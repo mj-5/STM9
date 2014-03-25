@@ -9,6 +9,6 @@
     <string name="decrypt_verification">Decryption|Verification</string>
 
     <!-- text -->
-    <string name="under_contruction">Sorry, under contruction.</string>
+    <string name="under_contruction">Sorry, under construction.</string>
 
 </resources>
