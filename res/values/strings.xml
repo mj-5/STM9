@@ -1,0 +1,14 @@
+<resources>
+
+    <string name="app_name">STM9</string>
+
+    <!-- button -->
+    <string name="key_list">Key List</string>
+    <string name="master_key">Master Key</string>
+    <string name="encrypt_sign">Encryption|Sign</string>
+    <string name="decrypt_verification">Decryption|Verification</string>
+
+    <!-- text -->
+    <string name="under_contruction">Sorry, under contruction.</string>
+
+</resources>
