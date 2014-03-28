@@ -6,6 +6,10 @@
     <uses-sdk
         android:minSdkVersion="9"
         android:targetSdkVersion="19" />
+    
+    <uses-feature 
+        android:name="android.hardware.touchscreen"
+        android:required="false"/>
 
     <application
         android:allowBackup="true"
@@ -33,18 +37,20 @@
         <activity
             android:name=".ui.MasterKeyActivity"
             android:configChanges="orientation|screenSize|keyboardHidden|keyboard"
-            android:label="@string/master_key" >
-            <intent-filter>
-                <category android:name="android.intent.category.DEFAULT" />
-            </intent-filter>
+            android:label="@string/master_key" 
+            android:launchMode="singleTop"
+            android:uiOptions="splitActionBarWhenNarrow">
         </activity>
+        <activity
+            android:name=".ui.KeyActivity"
+            android:configChanges="orientation|screenSize|keyboardHidden|keyboard"
+            android:label="@string/menu_buat_kunci"
+            android:uiOptions="splitActionBarWhenNarrow"
+            android:windowSoftInputMode="stateHidden" />
         <activity
             android:name=".ui.EncSignActivity"
             android:configChanges="orientation|screenSize|keyboardHidden|keyboard"
             android:label="@string/encrypt_sign" >
-            <intent-filter>
-                <category android:name="android.intent.category.DEFAULT" />
-            </intent-filter>
         </activity>
         <activity
             android:name=".ui.DecVerActivity"
