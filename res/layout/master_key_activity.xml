@@ -4,11 +4,6 @@
     android:layout_height="match_parent"
     android:orientation="vertical" >
 
-    <fragment
-        android:id="@+id/master_key_list_fragment"
-        android:name="id.stsn.stm9.fragment.KeyListSecretFragment"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:layout_weight="1" />
+
 
 </LinearLayout>

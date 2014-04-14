@@ -10,7 +10,7 @@ import android.os.Bundle;
 import com.actionbarsherlock.view.Menu;
 import com.actionbarsherlock.view.MenuItem;
 
-public class MasterKeyActivity extends Activity {
+public class MasterKeyActivity extends ListKeyActivity {
 
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -41,6 +41,6 @@ public class MasterKeyActivity extends Activity {
 
     /* buat kunci baru secara general */
     private void buatKunci() {
-
+    	// belum dikerjakan.
     }
 }

@@ -6,6 +6,8 @@ public class Id {
 		public static final class opsi{
 			public static final int passphrase_baru = 0x21070001;
 			public static final int create = 0x21070002;
+            public static final int export_keys = 0x21070007;
+
 		}
 	}
 	
@@ -13,6 +15,7 @@ public class Id {
 		public static final int user_id = 0x21070003;
 		public static final int key = 0x21070004;
 		public static final int secret_key = 0x21070002;
+        public static final int public_key = 0x21070001;
 	}
 	
 	public static final class choice{
@@ -24,5 +27,10 @@ public class Id {
 			public static final int encrypt_only = 0x21070002;
 			public static final int sign_and_encrypt = 0x21070003;
 		}
+	}
+	
+	public static final class request {
+        public static final int filename = 0x00007003;
+
 	}
 }

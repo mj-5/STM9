@@ -60,14 +60,6 @@
                 <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
         </activity>
-
-        <service
-            android:name="id.stsn.stm9.service.KeyIntentService"
-            android:exported="false" />
-        <service
-            android:name="id.stsn.stm9.services.PassphraseCacheService"
-            android:exported="false"
-            android:process=":passphrase_cache" />
     </application>
 
 </manifest>

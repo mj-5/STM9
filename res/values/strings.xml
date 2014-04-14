@@ -7,5 +7,23 @@
     <string name="hu_master_key">Master Key</string>
     <string name="hu_encrypt_sign">Encrypt | Sign</string>
     <string name="hu_decrypt_verification">Decrypt | Verification</string>
-	<string name="under_contruction">Sorry, under maintenance now.</string>
+    <string name="under_contruction">Maaf, dalam proses pengerjaan.</string>
+
+    <!-- Menu -->
+    <string name="menu_export_keys">Export semua kunci</string>
+
+    <!-- Title -->
+    <string name="title_export_key">Export Kunci</string>
+    <string name="title_export_keys">Export Semua Kunci</string>
+
+    <!-- cuap2x -->
+    <string name="specify_file_to_export_to">Export dimana? \nFile akan ditimpa apabila sudah ada!</string>
+    <string name="specify_file_to_export_secret_keys_to">Export dimana? \nFile akan ditimpa apabila sudah ada!</string>
+    <string name="key_exported">Sukses export 1 kunci</string>
+    <string name="keys_exported">Sukses export %s kunci</string>
+    <string name="no_keys_exported">Tidak ada export kunci.</string>
+
+    <!-- proses -->
+    <string name="proses_exporting">exporting…</string>
+
 </resources>
