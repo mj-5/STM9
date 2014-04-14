@@ -12,12 +12,12 @@
         android:layout_alignParentRight="true"
         android:text="@string/simpan_kunci" />
 
-    <LinearLayout
-        android:id="@+id/edit_key_container"
-        android:layout_width="fill_parent"
-        android:layout_height="wrap_content"
-        android:orientation="vertical" >
-    </LinearLayout>
+<!--     <LinearLayout -->
+<!--         android:id="@+id/edit_key_container" -->
+<!--         android:layout_width="fill_parent" -->
+<!--         android:layout_height="wrap_content" -->
+<!--         android:orientation="vertical" > -->
+<!--     </LinearLayout> -->
 
     <Button
         android:id="@+id/btn_batal_kunci"
@@ -28,23 +28,31 @@
         android:layout_alignParentLeft="true"
         android:text="@string/batal_kunci" />
 
-    <LinearLayout
-        android:id="@+id/linearLayout1"
-        android:layout_width="fill_parent"
+    <Button
+        android:id="@+id/isi_passphrase"
+        style="?android:attr/buttonStyleSmall"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="horizontal" 
-        android:baselineAligned="false">
+        android:layout_alignParentLeft="true"
+        android:text="@string/isi_passphrase" />
+    
+    <View
+        android:id="@+id/separator_1"
+        android:layout_width="fill_parent"
+        android:layout_height="1dip"
+        android:background="?android:attr/listDivider"
+        android:layout_below="@+id/isi_passphrase" />
 
-        <TableLayout
-            android:layout_width="0dip"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:paddingLeft="16dp"
-            android:paddingRight="16dp" >
+    <TableLayout
+        android:id="@+id/table_layout_1"
+        android:layout_width="100dp"
+        android:layout_height="wrap_content"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentRight="true"
+        android:layout_below="@+id/separator_1" >
 
-            <TableRow>
-
-                <TextView
+        <TableRow>
+            <TextView
                     android:id="@+id/label_nama"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
@@ -53,16 +61,15 @@
                     android:text="@string/label_nama" />
 
                 <EditText
-                    android:id="@+id/name"
+                    android:id="@+id/nama"
                     android:layout_width="fill_parent"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
                     android:inputType="textPersonName|textCapWords" />
-            </TableRow>
+        </TableRow>
 
-            <TableRow>
-
-                <TextView
+        <TableRow>
+            <TextView
                     android:id="@+id/label_email"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
@@ -77,16 +84,23 @@
                     android:layout_weight="1"
                     android:inputType="textEmailAddress" />
             </TableRow>
-        </TableLayout>
-    </LinearLayout>
 
-    <Button
-        android:id="@+id/isi_passphrase"
-        style="?android:attr/buttonStyleSmall"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_alignParentLeft="true"
-        android:layout_below="@+id/linearLayout1"
-        android:text="@string/isi_passphrase" />
+    </TableLayout>
+<View
+        android:id="@+id/separator_2"
+        android:layout_width="fill_parent"
+        android:layout_height="1dip"
+        android:background="?android:attr/listDivider"
+        android:layout_below="@+id/table_layout_1" />
+
+<Button
+    android:id="@+id/bangkit_kunci"
+    style="?android:attr/buttonStyleSmall"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:layout_alignParentLeft="true"
+    android:layout_alignParentRight="true"
+    android:layout_below="@+id/separator_2"
+    android:text="@string/bangkit_kunci" />
 
 </RelativeLayout>

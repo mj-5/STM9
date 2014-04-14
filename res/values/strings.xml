@@ -2,32 +2,10 @@
 
     <string name="app_name">STM9</string>
 
-    <!-- button -->
-    <string name="key_list">Key List</string>
-    <string name="master_key">Master Key</string>
-    <string name="encrypt_sign">Encryption|Sign</string>
-    <string name="decrypt_verification">Decryption|Verification</string>
-    <string name="simpan_kunci">Simpan</string>
-    <string name="batal_kunci">Batal</string>
-    <string name="isi_passphrase">Masukkan Passphrase</string>
-    <string name="ganti_passphrase">Ganti Passphrase</string>
-
-    <!-- text -->
-    <string name="under_contruction">Sorry, under construction.</string>
-    <string name="dua_kali_passphrase">Masukkan 2x passphrase</string>
-
-    <!-- menu -->
-    <string name="menu_buat_kunci">Generate Key</string>
-
-    <!-- label -->
-    <string name="label_nama">Username :</string>
-    <string name="label_email">Email:</string>
-    <string name="label_passphrase">Passphrase:</string>
-    <string name="label_passphrase_lagi">Ulangi:</string>
-
-<!--     lain -->
-    <string name="pesan_error">Error: %s</string>
-        <string name="passphrases_tidak_cocok">Passphrase tidak sama!</string>
-            <string name="passphrases_harus_isi">Masukkan passphrase!</string>
-        
+    <!-- Halaman Utama -->
+    <string name="hu_key_list">Key List</string>
+    <string name="hu_master_key">Master Key</string>
+    <string name="hu_encrypt_sign">Encrypt | Sign</string>
+    <string name="hu_decrypt_verification">Decrypt | Verification</string>
+	<string name="under_contruction">Sorry, under maintenance now.</string>
 </resources>
