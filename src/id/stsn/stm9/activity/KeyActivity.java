@@ -237,7 +237,7 @@ public class KeyActivity extends SherlockFragmentActivity {
 			title = R.string.title_set_passphrase;
 		}
 
-		SetPassphraseDialogFragment setPassphraseDialog = SetPassphraseDialogFragment.newInstance(messenger, title);
+		SetPassphraseDialogFragment setPassphraseDialog = SetPassphraseDialogFragment.nInstance(messenger, title);
 
 		setPassphraseDialog.show(getSupportFragmentManager(), "setPassphraseDialog");
 	}
