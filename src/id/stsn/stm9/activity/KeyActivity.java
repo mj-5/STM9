@@ -7,14 +7,14 @@ import java.util.Vector;
 import org.spongycastle.openpgp.PGPSecretKey;
 import org.spongycastle.openpgp.PGPSecretKeyRing;
 
-import id.stsn.stm9.Id;
-import id.stsn.stm9.R;
-import id.stsn.stm9.fragment.SetPassphraseDialogFragment;
-import id.stsn.stm9.pgp.PgpConvert;
-import id.stsn.stm9.pgp.PgpGeneralException;
-import id.stsn.stm9.services.ActionBarHelper;
-import id.stsn.stm9.services.KeyIntentService;
-import id.stsn.stm9.services.KeyIntentServiceHandler;
+import id.stsn.stm9.Id; //v
+import id.stsn.stm9.R; //v
+import id.stsn.stm9.fragment.SetPassphraseDialogFragment; //v
+import id.stsn.stm9.pgp.PgpConvert; //v
+import id.stsn.stm9.pgp.PgpGeneralException; //v
+import id.stsn.stm9.services.ActionBarHelper; //v
+import id.stsn.stm9.services.KeyIntentService; //v
+import id.stsn.stm9.services.KeyIntentServiceHandler; //v
 import id.stsn.stm9.widget.KeyEditor;
 import id.stsn.stm9.widget.SectionView;
 import id.stsn.stm9.widget.UserIdEditor;
