@@ -1,15 +1,19 @@
 package id.stsn.stm9.services;
 
+import java.io.FileOutputStream;
 import java.util.ArrayList;
 
 import org.spongycastle.openpgp.PGPSecretKey;
 import org.spongycastle.openpgp.PGPSecretKeyRing;
 
 import id.stsn.stm9.Id;
-import id.stsn.stm9.pgp.PgpConvert;
-import id.stsn.stm9.pgp.PgpKeyOperation;
+import id.stsn.stm9.R;
+import id.stsn.stm9.pgp.PgpConvert; //v
+import id.stsn.stm9.pgp.PgpGeneralException; //v
+import id.stsn.stm9.pgp.PgpImportExport;
+import id.stsn.stm9.pgp.PgpKeyOperation; //v
 import id.stsn.stm9.provider.ProviderHelper;
-import id.stsn.stm9.utility.ProgressDialogUpdater;
+import id.stsn.stm9.utility.ProgressDialogUpdater; //v
 
 import android.app.IntentService;
 import android.content.Intent;
@@ -25,150 +29,213 @@ import android.util.Log;
  */
 public abstract class KeyIntentService extends IntentService implements ProgressDialogUpdater {
 
-    /* pemberian dari intents */
-    public static final String EXTRA_MESSENGER = "messenger";
-    public static final String EXTRA_DATA = "data";
+	/* pemberian dari intents */
+	public static final String EXTRA_MESSENGER = "messenger";
+	public static final String EXTRA_DATA = "data";
 
-    /* possible actions */
-    public static final String ACTION_SAVE_KEYRING = "id.stsn.stm9" + ".action." + "SAVE_KEYRING";
-    public static final String ACTION_GENERATE_DEFAULT_RSA_KEYS = "id.stsn.stm9" + ".action." + "GENERATE_DEFAULT_RSA_KEYS";
+	/* possible actions */
+	public static final String ACTION_SAVE_KEYRING = "id.stsn.stm9" + ".action." + "SAVE_KEYRING";
+	public static final String ACTION_GENERATE_DEFAULT_RSA_KEYS = "id.stsn.stm9" + ".action." + "GENERATE_DEFAULT_RSA_KEYS";
+	public static final String ACTION_EXPORT_KEYRING = "id.stsn.stm9" + ".action." + "EXPORT_KEYRING";
 
-    /* data bundle kunci2 */
+	/* data bundle kunci2 */
 
-    /* simpan keyring */ 
-    public static final String SAVE_KEYRING_NEW_PASSPHRASE = "new_passphrase";
-    public static final String SAVE_KEYRING_CURRENT_PASSPHRASE = "current_passphrase";
-    public static final String SAVE_KEYRING_USER_IDS = "user_ids";
-    public static final String SAVE_KEYRING_KEYS = "keys";
-    public static final String SAVE_KEYRING_KEYS_USAGES = "keys_usages";
-    public static final String SAVE_KEYRING_MASTER_KEY_ID = "master_key_id";
-    public static final String SAVE_KEYRING_CAN_SIGN = "can_sign";
+	/* simpan keyring */ 
+	public static final String SAVE_KEYRING_NEW_PASSPHRASE = "new_passphrase";
+	public static final String SAVE_KEYRING_CURRENT_PASSPHRASE = "current_passphrase";
+	public static final String SAVE_KEYRING_USER_IDS = "user_ids";
+	public static final String SAVE_KEYRING_KEYS = "keys";
+	public static final String SAVE_KEYRING_KEYS_USAGES = "keys_usages";
+	public static final String SAVE_KEYRING_MASTER_KEY_ID = "master_key_id";
+	public static final String SAVE_KEYRING_CAN_SIGN = "can_sign";
 
-    /* generate kunci */ 
-    public static final String GENERATE_KEY_SYMMETRIC_PASSPHRASE = "passphrase";
-    
-    /* keys */
-    public static final String RESULT_NEW_KEY = "new_key";
+	/* generate kunci */ 
+	public static final String GENERATE_KEY_SYMMETRIC_PASSPHRASE = "passphrase";
 
-    Messenger vMessenger;
+	/* export kunci */
+	public static final String EXPORT_FILENAME = "export_filename";
+	public static final String EXPORT_KEY_TYPE = "export_key_type";
+	public static final String EXPORT_ALL = "export_all";
+	public static final String EXPORT_KEY_RING_MASTER_KEY_ID = "export_key_ring_id";
 
-    public KeyIntentService() {
-        super("ApgService");
-    }
+	/* keys */
+	public static final String RESULT_NEW_KEY = "new_key";
 
-    @Override
-    protected void onHandleIntent(Intent i) {
-        Bundle extras = i.getExtras();
-        if (extras == null) {
-            Log.e("stm-9", "Extras bundle is null!");
-            return;
-        }
+	/**
+	 * result
+	 */
 
-        if (!(extras.containsKey(EXTRA_MESSENGER) || extras.containsKey(EXTRA_DATA) || (i
-                .getAction() == null))) {
-            Log.e("stm-9",
-                    "Extra bundle must contain a messenger, a data bundle, and an action!");
-            return;
-        }
+	/* export */
+	public static final String RESULT_EXPORT = "exported";
 
-        vMessenger = (Messenger) extras.get(EXTRA_MESSENGER);
-        Bundle data = extras.getBundle(EXTRA_DATA);
+	Messenger vMessenger;
 
-        OtherHelper.logDebugBundle(data, "EXTRA_DATA");
+	public KeyIntentService() {
+		super("ApgService");
+	}
 
-        String action = i.getAction();
+	@Override
+	protected void onHandleIntent(Intent i) {
+		Bundle extras = i.getExtras();
+		if (extras == null) {
+			Log.e("stm-9", "Extras bundle is null!");
+			return;
+		}
 
-        /* execute action dari extra bundle */
-        if (ACTION_GENERATE_DEFAULT_RSA_KEYS.equals(action)) {
-            /* generate RSA 1024 key untuk signing untuk encrypting */
-            try {
-                /* Input */
-                String passphrase = data.getString(GENERATE_KEY_SYMMETRIC_PASSPHRASE);
+		if (!(extras.containsKey(EXTRA_MESSENGER) || extras.containsKey(EXTRA_DATA) || (i
+				.getAction() == null))) {
+			Log.e("stm-9",
+					"Extra bundle must contain a messenger, a data bundle, and an action!");
+			return;
+		}
 
-                /* Operation */
-                PgpKeyOperation keyOperations = new PgpKeyOperation(this, this);
+		vMessenger = (Messenger) extras.get(EXTRA_MESSENGER);
+		Bundle data = extras.getBundle(EXTRA_DATA);
 
-                PGPSecretKeyRing masterKeyRing = keyOperations.createKey(Id.pilihan.algoritma.rsa, 1024, passphrase, null);
+		OtherHelper.logDebugBundle(data, "EXTRA_DATA");
 
-                /* Output */
-                Bundle resultData = new Bundle();
-                resultData.putByteArray(RESULT_NEW_KEY, PgpConvert.PGPSecretKeyRingToBytes(masterKeyRing));
+		String action = i.getAction();
 
-                OtherHelper.logDebugBundle(resultData, "resultData");
+		/* execute action dari extra bundle */
+		if (ACTION_GENERATE_DEFAULT_RSA_KEYS.equals(action)) {
+			/* generate RSA 1024 key untuk signing untuk encrypting */
+			try {
+				/* Input */
+				String passphrase = data.getString(GENERATE_KEY_SYMMETRIC_PASSPHRASE);
 
-                sendMessageToHandler(KeyIntentServiceHandler.MESSAGE_OKAY, resultData);
-            } catch (Exception e) {
-                sendErrorToHandler(e);
-            }
-        } else if (ACTION_SAVE_KEYRING.equals(action)) {
-            try {
-                /* Input */
-                String oldPassPhrase = data.getString(SAVE_KEYRING_CURRENT_PASSPHRASE);
-                String newPassPhrase = data.getString(SAVE_KEYRING_NEW_PASSPHRASE);
-                boolean canSign = true;
+				/* Operation */
+				PgpKeyOperation keyOperations = new PgpKeyOperation(this, this);
 
-                if (data.containsKey(SAVE_KEYRING_CAN_SIGN)) {
-                    canSign = data.getBoolean(SAVE_KEYRING_CAN_SIGN);
-                }
+				PGPSecretKeyRing masterKeyRing = keyOperations.createKey(Id.pilihan.algoritma.rsa, 1024, passphrase, null);
 
-                if (newPassPhrase == null) {
-                    newPassPhrase = oldPassPhrase;
-                }
-                ArrayList<String> userIds = data.getStringArrayList(SAVE_KEYRING_USER_IDS);
-                ArrayList<PGPSecretKey> keys = PgpConvert.BytesToPGPSecretKeyList(data.getByteArray(SAVE_KEYRING_KEYS));
-                ArrayList<Integer> keysUsages = data.getIntegerArrayList(SAVE_KEYRING_KEYS_USAGES);
-                long masterKeyId = data.getLong(SAVE_KEYRING_MASTER_KEY_ID);
+				/* Output */
+				Bundle resultData = new Bundle();
+				resultData.putByteArray(RESULT_NEW_KEY, PgpConvert.PGPSecretKeyRingToBytes(masterKeyRing));
 
-                PgpKeyOperation keyOperations = new PgpKeyOperation(this, this);
-                /* Operation */
-                if (!canSign) {
-                    keyOperations.changeSecretKeyPassphrase(ProviderHelper.getPGPSecretKeyRingByKeyId(this, masterKeyId), oldPassPhrase, newPassPhrase);
-                } else {
-                    keyOperations.buildSecretKey(userIds, keys, keysUsages, masterKeyId, oldPassPhrase, newPassPhrase);
-                }
-                PassphraseCacheService.addCachedPassphrase(this, masterKeyId, newPassPhrase);
+				OtherHelper.logDebugBundle(resultData, "resultData");
 
-                /* Output */
-                sendMessageToHandler(KeyIntentServiceHandler.MESSAGE_OKAY);
-            } catch (Exception e) {
-                sendErrorToHandler(e);
-            }            
-        } 
-    }
+				sendMessageToHandler(KeyIntentServiceHandler.MESSAGE_OKAY, resultData);
+			} catch (Exception e) {
+				sendErrorToHandler(e);
+			}
+		} else if (ACTION_SAVE_KEYRING.equals(action)) {
+			try {
+				/* Input */
+				String oldPassPhrase = data.getString(SAVE_KEYRING_CURRENT_PASSPHRASE);
+				String newPassPhrase = data.getString(SAVE_KEYRING_NEW_PASSPHRASE);
+				boolean canSign = true;
 
-    private void sendErrorToHandler(Exception e) {
-        Log.e("stm-9", "ApgService Exception: ", e);
-        e.printStackTrace();
+				if (data.containsKey(SAVE_KEYRING_CAN_SIGN)) {
+					canSign = data.getBoolean(SAVE_KEYRING_CAN_SIGN);
+				}
 
-        Bundle data = new Bundle();
-        data.putString(KeyIntentServiceHandler.DATA_ERROR, e.getMessage());
-        sendMessageToHandler(KeyIntentServiceHandler.MESSAGE_EXCEPTION, null, data);
-    }
+				if (newPassPhrase == null) {
+					newPassPhrase = oldPassPhrase;
+				}
+				ArrayList<String> userIds = data.getStringArrayList(SAVE_KEYRING_USER_IDS);
+				ArrayList<PGPSecretKey> keys = PgpConvert.BytesToPGPSecretKeyList(data.getByteArray(SAVE_KEYRING_KEYS));
+				ArrayList<Integer> keysUsages = data.getIntegerArrayList(SAVE_KEYRING_KEYS_USAGES);
+				long masterKeyId = data.getLong(SAVE_KEYRING_MASTER_KEY_ID);
 
-    private void sendMessageToHandler(Integer arg1, Integer arg2, Bundle data) {
-        Message msg = Message.obtain();
-        msg.arg1 = arg1;
-        if (arg2 != null) {
-            msg.arg2 = arg2;
-        }
-        if (data != null) {
-            msg.setData(data);
-        }
+				PgpKeyOperation keyOperations = new PgpKeyOperation(this, this);
+				/* Operation */
+				if (!canSign) {
+					keyOperations.changeSecretKeyPassphrase(ProviderHelper.getPGPSecretKeyRingByKeyId(this, masterKeyId), oldPassPhrase, newPassPhrase);
+				} else {
+					keyOperations.buildSecretKey(userIds, keys, keysUsages, masterKeyId, oldPassPhrase, newPassPhrase);
+				}
+				PassphraseCacheService.addCachedPassphrase(this, masterKeyId, newPassPhrase);
 
-        try {
-            vMessenger.send(msg);
-        } catch (RemoteException e) {
-            Log.w("stm-9", "Exception sending message, Is handler present?", e);
-        } catch (NullPointerException e) {
-            Log.w("stm-9", "Messenger is null!", e);
-        }
-    }
+				/* Output */
+				sendMessageToHandler(KeyIntentServiceHandler.MESSAGE_OKAY);
+			} catch (Exception e) {
+				sendErrorToHandler(e);
+			}            
+		} else if (ACTION_EXPORT_KEYRING.equals(action)) {
+			try {
 
-    private void sendMessageToHandler(Integer arg1, Bundle data) {
-        sendMessageToHandler(arg1, null, data);
-    }
+				/* Input */
+				int keyType = Id.tipe.public_key;
+				if (data.containsKey(EXPORT_KEY_TYPE)) {
+					keyType = data.getInt(EXPORT_KEY_TYPE);
+				}
 
-    private void sendMessageToHandler(Integer arg1) {
-        sendMessageToHandler(arg1, null, null);
-    }
+				String outputFile = data.getString(EXPORT_FILENAME);
+
+				boolean exportAll = data.getBoolean(EXPORT_ALL);
+				long keyRingMasterKeyId = -1;
+				if (!exportAll) {
+					keyRingMasterKeyId = data.getLong(EXPORT_KEY_RING_MASTER_KEY_ID);
+				}
+
+				/* Operation */
+
+				// check if storage is ready
+				if (!FileHelper.isStorageMounted(outputFile)) {
+					throw new PgpGeneralException(getString(R.string.error_external_storage_not_ready));
+				}
+
+				// OutputStream
+				FileOutputStream outStream = new FileOutputStream(outputFile);
+
+				ArrayList<Long> keyRingMasterKeyIds = new ArrayList<Long>();
+				if (exportAll) {
+					// get all key ring row ids based on export type
+
+					if (keyType == Id.tipe.public_key) {
+						keyRingMasterKeyIds = ProviderHelper.getPublicKeyRingsMasterKeyIds(this);
+					} else {
+						keyRingMasterKeyIds = ProviderHelper.getSecretKeyRingsMasterKeyIds(this);
+					}
+				} else {
+					keyRingMasterKeyIds.add(keyRingMasterKeyId);
+				}
+
+				Bundle resultData = new Bundle();
+
+				PgpImportExport pgpImportExport = new PgpImportExport(this, this);
+				resultData = pgpImportExport.exportKeyRings(keyRingMasterKeyIds, keyType, outStream);
+
+				sendMessageToHandler(KeyIntentServiceHandler.MESSAGE_OKAY, resultData);
+			} catch (Exception e) {
+				sendErrorToHandler(e);
+			}
+		}
+	}
+
+	private void sendErrorToHandler(Exception e) {
+		Log.e("stm-9", "ApgService Exception: ", e);
+		e.printStackTrace();
+
+		Bundle data = new Bundle();
+		data.putString(KeyIntentServiceHandler.DATA_ERROR, e.getMessage());
+		sendMessageToHandler(KeyIntentServiceHandler.MESSAGE_EXCEPTION, null, data);
+	}
+
+	private void sendMessageToHandler(Integer arg1, Integer arg2, Bundle data) {
+		Message msg = Message.obtain();
+		msg.arg1 = arg1;
+		if (arg2 != null) {
+			msg.arg2 = arg2;
+		}
+		if (data != null) {
+			msg.setData(data);
+		}
+
+		try {
+			vMessenger.send(msg);
+		} catch (RemoteException e) {
+			Log.w("stm-9", "Exception sending message, Is handler present?", e);
+		} catch (NullPointerException e) {
+			Log.w("stm-9", "Messenger is null!", e);
+		}
+	}
+
+	private void sendMessageToHandler(Integer arg1, Bundle data) {
+		sendMessageToHandler(arg1, null, data);
+	}
+
+	private void sendMessageToHandler(Integer arg1) {
+		sendMessageToHandler(arg1, null, null);
+	}
 }
