@@ -1,0 +1,20 @@
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/bar_simpan"
+    style="@style/Widget.Sherlock.ActionButton"
+    android:layout_width="0dp"
+    android:layout_height="match_parent"
+    android:layout_weight="1" >
+
+    <TextView
+        android:id="@+id/bar_simpan_text"
+        style="@style/Widget.Sherlock.ActionBar.TabText"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:drawableLeft="@drawable/ic_simpan"
+        android:drawablePadding="8dp"
+        android:gravity="center_vertical"
+        android:paddingRight="20dp"
+        android:text="Done (set in-code!)" />
+
+</FrameLayout>
