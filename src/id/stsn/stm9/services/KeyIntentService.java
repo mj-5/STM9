@@ -37,6 +37,7 @@ public abstract class KeyIntentService extends IntentService implements Progress
 	public static final String ACTION_SAVE_KEYRING = "id.stsn.stm9" + ".action." + "SAVE_KEYRING";
 	public static final String ACTION_GENERATE_DEFAULT_RSA_KEYS = "id.stsn.stm9" + ".action." + "GENERATE_DEFAULT_RSA_KEYS";
 	public static final String ACTION_EXPORT_KEYRING = "id.stsn.stm9" + ".action." + "EXPORT_KEYRING";
+	public static final String ACTION_GENERATE_KEY = "id.stsn.stm9" + ".action." + "GENERATE_KEY";
 
 	/* data bundle kunci2 */
 
@@ -51,6 +52,9 @@ public abstract class KeyIntentService extends IntentService implements Progress
 
 	/* generate kunci */ 
 	public static final String GENERATE_KEY_SYMMETRIC_PASSPHRASE = "passphrase";
+	public static final String GENERATE_KEY_ALGORITHM = "algorithm";
+	public static final String GENERATE_KEY_KEY_SIZE = "key_size";
+	public static final String GENERATE_KEY_MASTER_KEY = "master_key";
 
 	/* export kunci */
 	public static final String EXPORT_FILENAME = "export_filename";
@@ -200,7 +204,34 @@ public abstract class KeyIntentService extends IntentService implements Progress
 			} catch (Exception e) {
 				sendErrorToHandler(e);
 			}
-		}
+		} else if (ACTION_GENERATE_KEY.equals(action)) {
+			try {
+				/* Input */
+				int algorithm = data.getInt(GENERATE_KEY_ALGORITHM);
+				String passphrase = data.getString(GENERATE_KEY_SYMMETRIC_PASSPHRASE);
+				int keysize = data.getInt(GENERATE_KEY_KEY_SIZE);
+				PGPSecretKey masterKey = null;
+				if (data.containsKey(GENERATE_KEY_MASTER_KEY)) {
+					masterKey = PgpConvert.BytesToPGPSecretKey(data.getByteArray(GENERATE_KEY_MASTER_KEY));
+				}
+
+				/* Operation */
+				PgpKeyOperation keyOperations = new PgpKeyOperation(this, this);
+				PGPSecretKeyRing newKeyRing = keyOperations.createKey(algorithm, keysize,
+						passphrase, masterKey);
+
+				/* Output */
+				Bundle resultData = new Bundle();
+				resultData.putByteArray(RESULT_NEW_KEY,
+						PgpConvert.PGPSecretKeyRingToBytes(newKeyRing));
+
+				OtherHelper.logDebugBundle(resultData, "resultData");
+
+				sendMessageToHandler(KeyIntentServiceHandler.MESSAGE_OKAY, resultData);
+			} catch (Exception e) {
+				sendErrorToHandler(e);
+			}
+  } 
 	}
 
 	private void sendErrorToHandler(Exception e) {

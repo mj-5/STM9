@@ -15,9 +15,9 @@ import id.stsn.stm9.pgp.PgpGeneralException; //v
 import id.stsn.stm9.services.ActionBarHelper; //v
 import id.stsn.stm9.services.KeyIntentService; //v
 import id.stsn.stm9.services.KeyIntentServiceHandler; //v
-import id.stsn.stm9.widget.KeyEditor;
-import id.stsn.stm9.widget.SectionView;
-import id.stsn.stm9.widget.UserIdEditor;
+import id.stsn.stm9.widget.KeyEditor; //v
+import id.stsn.stm9.widget.SectionView; //v
+import id.stsn.stm9.widget.UserIdEditor; //v
 
 import android.app.ProgressDialog;
 import android.content.Context;

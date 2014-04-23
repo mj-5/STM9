@@ -89,4 +89,34 @@ public class PgpConvert {
 		}
 	}
 
+	/**
+	 * Convert from byte[] to PGPSecretKey
+	 * 
+	 * Singles keys are encoded as keyRings with one single key in it by Bouncy Castle
+	 * 
+	 * @param keysBytes
+	 * @return
+	 */
+	public static PGPSecretKey BytesToPGPSecretKey(byte[] keyBytes) {
+		PGPSecretKey key = BytesToPGPSecretKeyList(keyBytes).get(0);
+
+		return key;
+	}
+
+  /**
+  * Convert from PGPSecretKey to byte[]
+  * 
+  * @param keysBytes
+  * @return
+  */
+ public static byte[] PGPSecretKeyToBytes(PGPSecretKey key) {
+     try {
+         return key.getEncoded();
+     } catch (IOException e) {
+         Log.e("Stm-9", "Encoding failed", e);
+
+         return null;
+     }
+ }
+
 }
