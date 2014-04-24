@@ -29,7 +29,7 @@ public class ListKeyActivity extends SherlockFragmentActivity {
 	protected boolean mDeleteAfterImport = false;
 	protected int tipeKunci;
 
-	//    FileDialogFragment mFileDialog;
+	    FileDialogFragment mFileDialog;
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
