@@ -15,6 +15,7 @@ import id.stsn.stm9.pgp.PgpKeyHelper;
 import id.stsn.stm9.provider.KeyContract.KeyRings;
 import id.stsn.stm9.provider.KeyContract.Keys;
 import id.stsn.stm9.provider.KeyContract.UserIds;
+import id.stsn.stm9.provider.KeyDatabase.Tables;
 import id.stsn.stm9.utility.IterableIterator;
 
 import android.content.ContentProviderOperation;
@@ -434,5 +435,51 @@ public class ProviderHelper {
     public static long getSecretMasterKeyId(Context context, long keyRingRowId) {
         Uri queryUri = KeyRings.buildSecretKeyRingsUri(String.valueOf(keyRingRowId));
         return getMasterKeyId(context, queryUri, keyRingRowId);
+    }
+    
+    /**
+     * Get empty status of master key of keyring by its row id
+     * 
+     * @param context
+     * @param keyRingRowId
+     * @return
+     */
+    public static boolean getSecretMasterKeyCanSign(Context context, long keyRingRowId) {
+        Uri queryUri = KeyRings.buildSecretKeyRingsUri(String.valueOf(keyRingRowId));
+        return getMasterKeyCanSign(context, queryUri, keyRingRowId);
+    }
+
+    /**
+     * Private helper method to get master key private empty status of keyring by its row id
+     * 
+     * @param context
+     * @param queryUri
+     * @param keyRingRowId
+     * @return
+     */
+    private static boolean getMasterKeyCanSign(Context context, Uri queryUri, long keyRingRowId) {
+        String[] projection = new String[] {
+                KeyRings.MASTER_KEY_ID,
+                "(SELECT COUNT(sign_keys." + Keys._ID + ") FROM " + Tables.KEYS
+                        + " AS sign_keys WHERE sign_keys." + Keys.KEY_RING_ROW_ID + " = "
+                        + KeyDatabase.Tables.KEY_RINGS + "." + KeyRings._ID
+                        + " AND sign_keys." + Keys.CAN_SIGN + " = '1' AND " + Keys.IS_MASTER_KEY
+                        + " = 1) AS sign", };
+
+        ContentResolver cr = context.getContentResolver();
+        Cursor cursor = cr.query(queryUri, projection, null, null, null);
+
+        long masterKeyId = -1;
+        if (cursor != null && cursor.moveToFirst()) {
+            int masterKeyIdCol = cursor.getColumnIndex("sign");
+
+            masterKeyId = cursor.getLong(masterKeyIdCol);
+        }
+
+        if (cursor != null) {
+            cursor.close();
+        }
+
+        return (masterKeyId > 0);
     }
 }

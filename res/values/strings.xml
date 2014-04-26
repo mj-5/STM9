@@ -1,29 +1,242 @@
 <resources>
 
-    <string name="app_name">STM9</string>
+    <string name="app_name">STM9.v1</string>
 
     <!-- Halaman Utama -->
     <string name="hu_key_list">Key List</string>
     <string name="hu_master_key">Master Key</string>
     <string name="hu_encrypt_sign">Encrypt | Sign</string>
     <string name="hu_decrypt_verification">Decrypt | Verification</string>
-    <string name="under_contruction">Maaf, dalam proses pengerjaan.</string>
 
-    <!-- Menu -->
-    <string name="menu_export_keys">Export semua kunci</string>
-
-    <!-- Title -->
-    <string name="title_export_key">Export Kunci</string>
-    <string name="title_export_keys">Export Semua Kunci</string>
-
-    <!-- cuap2x -->
-    <string name="specify_file_to_export_to">Export dimana? \nFile akan ditimpa apabila sudah ada!</string>
-    <string name="specify_file_to_export_secret_keys_to">Export dimana? \nFile akan ditimpa apabila sudah ada!</string>
+    <!-- cuap-cuap -->
+    <string name="informasi">Tekan yang lama untuk melihat opsi</string>
+    <string name="set_a_passphrase">Set passphrase dulu</string>
+    <string name="passphrase_for_symmetric_encryption">Symmetric encryption.</string>
+    <string name="key_not_found">Kunci tidak ditemukan %08X.</string>
+    <string name="passphrase_for">Masukkan passphrase untuk \'%s\'</string>
+    <string name="wrong_passphrase">Passphrase salah</string>
+    <string name="enter_passphrase_twice">Masukkan passphrase 2x:</string>
+    <string name="passphrases_do_not_match">Passphrase tidak cocok!</string>
+    <string name="passphrase_must_not_be_empty">Passphrase harus diisi!</string>
+    <string name="key_creation_el_gamal_info">Note: only subkeys support ElGamal, and for ElGamal the nearest keysize of 1536, 2048, 3072, 4096, or 8192 will be used.</string>
+    <string name="hint_secret_keys">Search Secret Keys</string>
+    <string name="keys_found">Ditemukan %s kunci(s).</string>
+    <string name="specify_file_to_export_to">Export dimana? \nFile akan ditimpa apabila sudah ada!.</string>
+    <string name="specify_file_to_export_secret_keys_to">Export dimana? \nFile akan ditimpa apabila sudah ada!.</string>
     <string name="key_exported">Sukses export 1 kunci</string>
     <string name="keys_exported">Sukses export %s kunci</string>
     <string name="no_keys_exported">Tidak ada export kunci.</string>
+    <string name="no_filemanager_installed">No compatible file manager installed.</string>
+    <string name="file_delete_confirmation">Yakin menghapus file\n%s?</string>
+    <string name="file_delete_successful">Berhasil dihapus.</string>
+    <string name="key_deletion_confirmation">Do you really want to delete the key \'%s\'?\nYou can\'t undo this!</string>
+    <string name="secret_key_deletion_confirmation">Do you really want to delete the SECRET key \'%s\'?\nYou can\'t undo this!</string>
+    <string name="list_empty">This list is empty!</string>
+    <string name="lookup_unknown_key">Unknown key %s, do you want to try finding it on a keyserver?</string>
+    <string name="using_clipboard_content">Using clipboard content.</string>
+    <string name="no_file_selected">Select a file first.</string>
+    <string name="specify_file_to_decrypt_to">Please specify which file to decrypt to.\nWARNING! File will be overwritten if it exists.</string>
+    <string name="decryption_successful">Berhasil dekripsi.</string>
+    <string name="unknown_signature_key_touch_to_look_up">Unknown signature, touch to look up key.</string>
+    <string name="select_encryption_key">Select at least one encryption key.</string>
+    <string name="select_encryption_or_signature_key">Select at least one encryption key or a signature key.</string>
+    <string name="specify_file_to_encrypt_to">Please specify which file to encrypt to.\nWARNING! File will be overwritten if it exists.</string>
+    <string name="encryption_to_clipboard_successful">Successfully encrypted to clipboard.</string>
+    <string name="encryption_successful">Enkripsi berhasil.</string>
+    <string name="keys_added_and_updated">Successfully added %1$s key(s) and updated %2$s key(s).</string>
+    <string name="keys_added">Successfully added %s key(s).</string>
+    <string name="keys_updated">Successfully updated %s key(s).</string>
+    <string name="no_keys_added_or_updated">No keys added or updated.</string>
+    <string name="bad_keys_encountered">%s bad secret key(s) ignored. Perhaps you exported with the option\n —export-secret-subkeys\nMake sure you export with\n —export-secret-keys\ninstead.</string>
+    <string name="key_send_success">Successfully sent key to server</string>
 
-    <!-- proses -->
+    <!-- menu -->
+    <string name="menu_buat_kunci">Buat Kunci Baru</string>
+    <string name="menu_key_server">Import from key server</string>
+    <string name="menu_import_from_file">Import dari file</string>
+    <string name="menu_export_keys">Export semua kunci</string>
+    <string name="menu_export_key">Export to file</string>
+    <string name="menu_delete_key">Delete key</string>
+    <string name="menu_update_key">Update from server</string>
+    <string name="menu_sign_key">Sign key</string>
+    <string name="menu_export_key_to_server">Export to server</string>
+    <string name="menu_share">Share with…</string>
+    <string name="menu_edit_key">Edit key</string>
+
+    <!-- tombol -->
+    <string name="tmbl_simpan">Simpan</string>
+    <string name="tmbl_batal">Batal</string>
+    <string name="tmbl_ganti_passphrase">Ganti Passphrase</string>
+    <string name="tmbl_set_passphrase">Masukkan Passphrase</string>
+    <string name="tmbl_no_date">None</string>
+    <string name="tmbl_search">Cari</string>
+    <string name="tmbl_delete">Delete</string>
+    <string name="tmbl_verify">Verify</string>
+    <string name="tmbl_decrypt">Decrypt</string>
+    <string name="tmbl_select_encrypt_keys">Select Recipients</string>
+    <string name="tmbl_encrypt_file">Encrypt File</string>
+    <string name="tmbl_encrypt_and_send">Encrypt and send…</string>
+    <string name="tmbl_encrypt_to_clipboard">Encrypt to Clipboard</string>
+    <string name="tmbl_sign_and_send">Sign and send…</string>
+    <string name="tmbl_sign_to_clipboard">Sign (Clipboard)</string>
+    <string name="tmbl_export_to_server">Export To Server</string>
+    <string name="tmbl_okay">OK!</string>
+    <string name="tmbl_do_not_save">Cancel</string>
+
+    <!-- label -->
+    <string name="label_passphrase">Passphrase</string>
+    <string name="label_no_passphrase">No Passphrase</string>
+    <string name="label_passphrase_twice">Ulangi</string>
+    <string name="unknown_user_id">&lt;unknown></string>
+    <string name="none">&lt;none></string>
+    <string name="label_key_id">Key ID</string>
+    <string name="label_algorithm">Algoritma</string>
+    <string name="label_creation">Dibuat</string>
+    <string name="label_expiry">Expiry</string>
+    <string name="label_usage">Digunakan</string>
+    <string name="label_main_user_id">Main User ID</string>
+    <string name="label_name">Nama</string>
+    <string name="label_email">Email</string>
+    <string name="label_comment">Comment</string>
+    <string name="label_key_size">Key Size</string>
+    <string name="no_key">&lt;Tidak ditemukan kunci></string>
+    <string name="secret_key">Secret Key:</string>
+    <string name="fingerprint">Fingerprint:</string>
+    <string name="can_encrypt">can encrypt</string>
+    <string name="can_sign">can sign</string>
+    <string name="expired">expired</string>
+    <string name="unknown_status"></string>
+    <string name="label_message">Message</string>
+    <string name="label_delete_after_decryption">Delete After Decryption</string>
+    <string name="label_file">File</string>
+    <string name="label_asymmetric">Public Key</string>
+    <string name="label_symmetric">Passphrase</string>
+    <string name="label_sign">Sign</string>
+    <string name="label_select_public_keys">Public Key(s)</string>
+    <string name="label_file_compression">File Compression</string>
+    <string name="label_delete_after_encryption">Delete After Encryption</string>
+    <string name="label_ascii_armor">ASCII Armor</string>
+    <string name="no_keys_selected">Select</string>
+    <string name="one_key_selected">1 Selected</string>
+    <string name="n_keys_selected">Selected</string>
+
+    <!-- title -->
+    <string name="title_generate_kunci">Generate Kunci</string>
+    <string name="title_edit_kunci">Edit Kunci</string>
+    <string name="title_ganti_passphrase">Ganti Passphrase</string>
+    <string name="title_set_passphrase">Set Passphrase</string>
+    <string name="title_main_menu">STM9 Menu</string>
+    <string name="title_master_key">Master Key</string>
+    <string name="title_key_list">Key List</string>
+    <string name="title_encrypt_sign">Encrypt | Sign</string>
+    <string name="title_decrypt_verification">Decrypt | Verification</string>
+    <string name="title_authentication">Passphrase</string>
+    <string name="title_key_not_found">Kunci tidak ditemukan</string>
+    <string name="title_export_key">Export Kunci</string>
+    <string name="title_export_keys">Export Semua Kunci</string>
+    <string name="title_unknown_signature_key">Unknown Signature Key</string>
+    <string name="title_decrypt_to_file">Decrypt To File</string>
+    <string name="title_encrypt_to_file">Encrypt To File</string>
+    <string name="title_send_email">"Send Mail…"</string>
+    <string name="title_preferences">"Preferences"</string>
+    <string name="title_key_server_query">Query Key Server</string>
+    <string name="title_import_keys">Import Keys</string>
+    <string name="title_send_key">Export to Key Server</string>
+    <string name="title_select_recipients">Select Public Key</string>
+    <string name="title_select_secret_key">Select Secret Key</string>
+
+    <!-- progress -->
+    <string name="proses_generate">Proses generate kunci, tunggu sebentar</string>
+    <string name="proses_simpan">simpan…</string>
+    <string name="proses_querying">querying…</string>
     <string name="proses_exporting">exporting…</string>
+    <string name="proses_deleting_securely">delete \'%s\' securely…</string>
+    <string name="proses_importing_secret_keys">import secret keys…</string>
+    <string name="proses_done">selesai</string>
+    <string name="proses_exporting_key">export kunci…</string>
+    <string name="proses_exporting_keys">export kunci2…</string>
+    <string name="proses_building_key">build kunci…</string>
+    <string name="proses_saving_key_ring">saving kunci…</string>
+    <string name="proses_preparing_master_key">preparing master key…</string>
+    <string name="proses_certifying_master_key">certifying master key…</string>
+    <string name="proses_adding_sub_keys">adding sub keys…</string>
+    <string name="proses_extracting_signature_key">extracting signature key…</string>
+    <string name="proses_preparing_streams">preparing streams…</string>
+    <string name="proses_preparing_signature">preparing signature…</string>
+    <string name="proses_encrypting">encrypt data…</string>
+    <string name="proses_generating_signature">generating signature…</string>
+    <string name="proses_signing">signing…</string>
+    <string name="proses_reading_data">reading data…</string>
+    <string name="proses_finding_key">pencarian kunci…</string>
+    <string name="proses_extracting_key">extract kunci…</string>
+    <string name="proses_decompressing_data">decompressing data…</string>
+    <string name="proses_processing_signature">processing signature…</string>
+    <string name="proses_decrypting">decrypting data…</string>
+    <string name="proses_verifying_signature">verifying signature…</string>
+    <string name="proses_verifying_integrity">verifying integrity…</string>
+    <string name="proses_importing">importing…</string>
+
+    <!-- error -->
+    <string name="error_secret_key_not_found">tidak ditemukan secret key</string>
+    <string name="error_message">Error: %s</string>
+    <string name="error_user_id_name">masukkan nama lebih spesifik</string>
+    <string name="error_user_id_email">masukkan alamat email lebih spesifik</string>
+    <string name="error_key_needs_user_id">paling tidak isikan satu user id</string>
+    <string name="error_main_user_id_no_empty">main user id tidak boleh kosong</string>
+    <string name="error_key_needs_master_key">paling tidak ada satu master key</string>
+    <string name="error_external_storage_not_ready">external storage belum siap</string>
+    <string name="error_could_not_extract_private_key">tidak bisa extract private key</string>
+    <string name="error_invalid_email">Email salah \'%s\'</string>
+    <string name="error_invalid_data">Data enkripsi tidak valid</string>
+    <string name="error_saving_keys">error saving kunci(s)</string>
+    <string name="error_key_size_minimum512bit">key size minimal 512bit</string>
+    <string name="error_master_key_must_not_be_el_gamal">the master key tidak bisa ElGamal key</string>
+    <string name="error_unknown_algorithm_choice">pilihan algoritma tidak dikenali</string>
+    <string name="error_signature_failed">signature gagal</string>
+    <string name="error_no_encryption_keys_or_passphrase">no encryption key(s) or passphrase given</string>
+    <string name="error_no_signature_passphrase">no passphrase given</string>
+    <string name="error_no_signature_key">no signature key given</string>
+    <string name="error_no_symmetric_encryption_packet">couldn\'t find a packet with symmetric encryption</string>
+    <string name="error_no_secret_key_found">no suitable secret key found</string>
+    <string name="error_wrong_passphrase">salah passphrase</string>
+    <string name="error_corrupt_data">corrupt data</string>
+    <string name="error_nothing_import">Nothing to import!</string>
+    <string name="error_only_files_are_supported">Direct binary data without actual file in filesystem is not supported. This is only supported by ACTION_ENCRYPT_STREAM_AND_RETURN.</string>
+    <string name="error_file_not_found">file not found</string>
+    <string name="error_no_known_encryption_found">no known kind of encryption found</string>
+
+    <!-- pilihan -->
+    <string name="choice_sign_only">Sign saja</string>
+    <string name="choice_encrypt_only">Encrypt saja</string>
+    <string name="choice_sign_and_encrypt">Encrypt dan Sign</string>
+    <string name="dsa">DSA</string>
+    <string name="elgamal">ElGamal</string>
+    <string name="rsa">RSA</string>
+    <string name="choice_none">None</string>
+    <string name="warning">Warning</string>
+    <string name="filemanager_title_open">Open…</string>
+
+    <!-- section -->
+    <string name="section_user_ids">User IDs</string>
+    <string name="section_keys">Kunci</string>
+
+    <!-- key bit length selections -->
+    <string name="key_size_1024">1024</string>
+    <string name="key_size_2048">2048</string>
+
+    <!-- compression -->
+    <string name="compression_fast">fast</string>
+    <string name="compression_very_slow">very slow</string>
+
+    <!-- Import -->
+    <string name="import_import">Import selected keys</string>
+    <string name="import_sign_and_upload">Import, Sign, and upload selected keys</string>
+    <string name="import_from_clipboard">Import from Clipboard</string>
+
+    <!-- Intent labels -->
+    <string name="intent_decrypt_file">STM9: Decrypt File</string>
+    <string name="intent_import_key">STM9: Import Key</string>
+    <string name="intent_send_encrypt">STM9: Encrypt</string>
+    <string name="intent_send_decrypt">STM9: Decrypt</string>
 
 </resources>
