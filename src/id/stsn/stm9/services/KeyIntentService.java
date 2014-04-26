@@ -5,6 +5,7 @@ import java.io.FileOutputStream;
 import java.io.InputStream;
 import java.util.ArrayList;
 
+import org.spongycastle.openpgp.PGPPublicKeyRing;
 import org.spongycastle.openpgp.PGPSecretKey;
 import org.spongycastle.openpgp.PGPSecretKeyRing;
 
@@ -46,7 +47,8 @@ public abstract class KeyIntentService extends IntentService implements Progress
 	public static final String ACTION_GENERATE_KEY = "id.stsn.stm9" + ".action." + "GENERATE_KEY";
 	public static final String ACTION_QUERY_KEYRING = "id.stsn.stm9" + ".action." + "QUERY_KEYRING";
 	public static final String ACTION_IMPORT_KEYRING = "id.stsn.stm9" + ".action." + "IMPORT_KEYRING";
-
+	public static final String ACTION_UPLOAD_KEYRING = "id.stsn.stm9" + ".action." + "UPLOAD_KEYRING";
+	
 	/* data bundle kunci2 */
 
 	/* encrypt, decrypt, import export */
@@ -100,6 +102,11 @@ public abstract class KeyIntentService extends IntentService implements Progress
 
 	/* export */
 	public static final String RESULT_EXPORT = "exported";
+	
+	/* upload key */
+	public static final String UPLOAD_KEY_SERVER = "upload_key_server";
+	public static final String UPLOAD_KEY_KEYRING_ROW_ID = "upload_key_ring_id";
+
 
 	Messenger vMessenger;
 
@@ -327,6 +334,32 @@ public abstract class KeyIntentService extends IntentService implements Progress
 				sendErrorToHandler(e);
 			}
 		}
+		
+		else if (ACTION_UPLOAD_KEYRING.equals(action)) {
+            try {
+
+                /* Input */
+                int keyRingRowId = data.getInt(UPLOAD_KEY_KEYRING_ROW_ID);
+                String keyServer = data.getString(UPLOAD_KEY_SERVER);
+
+                /* Operation */
+                HkpKeyServer server = new HkpKeyServer(keyServer);
+
+                PGPPublicKeyRing keyring = ProviderHelper.getPGPPublicKeyRingByRowId(this, keyRingRowId);
+                if (keyring != null) {
+                    PgpImportExport pgpImportExport = new PgpImportExport(this, null);
+
+                    boolean uploaded = pgpImportExport.uploadKeyRingToServer(server, (PGPPublicKeyRing) keyring);
+                    if (!uploaded) {
+                        throw new PgpGeneralException("Unable to export key to selected server");
+                    }
+                }
+
+                sendMessageToHandler(KeyIntentServiceHandler.MESSAGE_OKAY);
+            } catch (Exception e) {
+                sendErrorToHandler(e);
+            }
+        }
 	}
 
 	private void sendErrorToHandler(Exception e) {

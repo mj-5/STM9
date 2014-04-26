@@ -1,6 +1,7 @@
 package id.stsn.stm9.pgp;
 
 import java.io.BufferedInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
@@ -23,11 +24,13 @@ import id.stsn.stm9.Id;
 import id.stsn.stm9.pgp.PgpGeneralException;
 import id.stsn.stm9.provider.ProviderHelper;
 import id.stsn.stm9.services.KeyIntentService;
+import id.stsn.stm9.utility.HkpKeyServer;
 import id.stsn.stm9.utility.IterableIterator;
 import id.stsn.stm9.utility.PositionAwareInputStream;
 import id.stsn.stm9.utility.ProgressDialogUpdater;
 //import id.stsn.stm9.fragment.ImportKeysListFragment.InputData;
 import id.stsn.stm9.utility.InputData;
+import id.stsn.stm9.utility.KeyServer.AddKeyException;
 
 import android.content.Context;
 import android.os.Bundle;
@@ -276,5 +279,29 @@ public class PgpImportExport {
         }
 
         return status;
+    }
+    
+    public boolean uploadKeyRingToServer(HkpKeyServer server, PGPPublicKeyRing keyring) {
+        ByteArrayOutputStream bos = new ByteArrayOutputStream();
+        ArmoredOutputStream aos = new ArmoredOutputStream(bos);
+        try {
+            aos.write(keyring.getEncoded());
+            aos.close();
+
+            String armouredKey = bos.toString("UTF-8");
+            server.add(armouredKey);
+
+            return true;
+        } catch (IOException e) {
+            return false;
+        } catch (AddKeyException e) {
+            // TODO: tell the user?
+            return false;
+        } finally {
+            try {
+                bos.close();
+            } catch (IOException e) {
+            }
+        }
     }
 }

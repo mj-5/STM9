@@ -482,4 +482,16 @@ public class ProviderHelper {
 
         return (masterKeyId > 0);
     }
+    
+    /**
+     * Retrieves the actual PGPPublicKeyRing object from the database blob based on the rowId
+     * 
+     * @param context
+     * @param rowId
+     * @return
+     */
+    public static PGPPublicKeyRing getPGPPublicKeyRingByRowId(Context context, long rowId) {
+        Uri queryUri = KeyRings.buildPublicKeyRingsUri(Long.toString(rowId));
+        return (PGPPublicKeyRing) getPGPKeyRing(context, queryUri);
+    }
 }
