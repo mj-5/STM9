@@ -18,6 +18,7 @@ import id.stsn.stm9.provider.KeyContract.UserIds;
 import id.stsn.stm9.utility.IterableIterator;
 
 import android.content.ContentProviderOperation;
+import android.content.ContentResolver;
 import android.content.ContentValues;
 import android.content.Context;
 import android.content.OperationApplicationException;
@@ -380,4 +381,58 @@ public class ProviderHelper {
 		Uri queryUri = KeyRings.buildSecretKeyRingsByMasterKeyIdUri(Long.toString(masterKeyId));
 		return (PGPSecretKeyRing) getPGPKeyRing(context, queryUri);
 	}
+	
+    /**
+     * Get master key id of keyring by its row id
+     * 
+     * @param context
+     * @param keyRingRowId
+     * @return
+     */
+    public static long getPublicMasterKeyId(Context context, long keyRingRowId) {
+        Uri queryUri = KeyRings.buildPublicKeyRingsUri(String.valueOf(keyRingRowId));
+        return getMasterKeyId(context, queryUri, keyRingRowId);
+    }
+
+
+    /**
+     * Private helper method to get master key id of keyring by its row id
+     * 
+     * @param context
+     * @param queryUri
+     * @param keyRingRowId
+     * @return
+     */
+    private static long getMasterKeyId(Context context, Uri queryUri, long keyRingRowId) {
+        String[] projection = new String[] { KeyRings.MASTER_KEY_ID };
+
+        ContentResolver cr = context.getContentResolver();
+        Cursor cursor = cr.query(queryUri, projection, null, null, null);
+
+        long masterKeyId = -1;
+        if (cursor != null && cursor.moveToFirst()) {
+            int masterKeyIdCol = cursor.getColumnIndex(KeyRings.MASTER_KEY_ID);
+
+            masterKeyId = cursor.getLong(masterKeyIdCol);
+        }
+
+        if (cursor != null) {
+            cursor.close();
+        }
+
+        return masterKeyId;
+    }
+
+
+    /**
+     * Get master key id of keyring by its row id
+     * 
+     * @param context
+     * @param keyRingRowId
+     * @return
+     */
+    public static long getSecretMasterKeyId(Context context, long keyRingRowId) {
+        Uri queryUri = KeyRings.buildSecretKeyRingsUri(String.valueOf(keyRingRowId));
+        return getMasterKeyId(context, queryUri, keyRingRowId);
+    }
 }

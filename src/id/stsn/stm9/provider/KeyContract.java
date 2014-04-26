@@ -85,6 +85,14 @@ public class KeyContract {
 			return CONTENT_URI.buildUpon().appendPath(PATH_SECRET).appendPath(PATH_BY_KEY_ID)
 					.appendPath(keyId).build();
 		}
+		
+        public static Uri buildPublicKeyRingsUri(String keyRingRowId) {
+            return CONTENT_URI.buildUpon().appendPath(PATH_PUBLIC).appendPath(keyRingRowId).build();
+        }
+        
+        public static Uri buildSecretKeyRingsUri(String keyRingRowId) {
+            return CONTENT_URI.buildUpon().appendPath(PATH_SECRET).appendPath(keyRingRowId).build();
+        }
 	}
 
 	public static class Keys implements KeysColumns, BaseColumns {
