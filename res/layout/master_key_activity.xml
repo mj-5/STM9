@@ -6,7 +6,7 @@
 
     <fragment
         android:id="@+id/key_list_secret_fragment"
-        android:name="id.stsn.stm9.fragment.KeyListSecretFragment"
+        android:name="id.stsn.stm9.fragment.MasterKeyListFragment"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_weight="1" />
