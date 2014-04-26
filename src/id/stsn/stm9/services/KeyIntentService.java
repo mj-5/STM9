@@ -1,6 +1,8 @@
 package id.stsn.stm9.services;
 
+import java.io.ByteArrayInputStream;
 import java.io.FileOutputStream;
+import java.io.InputStream;
 import java.util.ArrayList;
 
 import org.spongycastle.openpgp.PGPSecretKey;
@@ -8,12 +10,16 @@ import org.spongycastle.openpgp.PGPSecretKeyRing;
 
 import id.stsn.stm9.Id;
 import id.stsn.stm9.R;
+//import id.stsn.stm9.fragment.ImportKeysListFragment.InputData;
 import id.stsn.stm9.pgp.PgpConvert; //v
 import id.stsn.stm9.pgp.PgpGeneralException; //v
 import id.stsn.stm9.pgp.PgpImportExport; //v
 import id.stsn.stm9.pgp.PgpKeyOperation; //v
 import id.stsn.stm9.provider.ProviderHelper;
+import id.stsn.stm9.utility.HkpKeyServer;
+import id.stsn.stm9.utility.KeyServer.KeyInfo;
 import id.stsn.stm9.utility.ProgressDialogUpdater; //v
+import id.stsn.stm9.utility.InputData;
 
 import android.app.IntentService;
 import android.content.Intent;
@@ -38,8 +44,17 @@ public abstract class KeyIntentService extends IntentService implements Progress
 	public static final String ACTION_GENERATE_DEFAULT_RSA_KEYS = "id.stsn.stm9" + ".action." + "GENERATE_DEFAULT_RSA_KEYS";
 	public static final String ACTION_EXPORT_KEYRING = "id.stsn.stm9" + ".action." + "EXPORT_KEYRING";
 	public static final String ACTION_GENERATE_KEY = "id.stsn.stm9" + ".action." + "GENERATE_KEY";
+	public static final String ACTION_QUERY_KEYRING = "id.stsn.stm9" + ".action." + "QUERY_KEYRING";
+	public static final String ACTION_IMPORT_KEYRING = "id.stsn.stm9" + ".action." + "IMPORT_KEYRING";
 
 	/* data bundle kunci2 */
+
+	/* encrypt, decrypt, import export */
+	public static final String TARGET = "target";
+	  
+	/* target */ 
+	public static final int TARGET_BYTES = 1;
+	public static final int TARGET_STREAM = 3;
 
 	/* simpan keyring */ 
 	public static final String SAVE_KEYRING_NEW_PASSPHRASE = "new_passphrase";
@@ -61,10 +76,24 @@ public abstract class KeyIntentService extends IntentService implements Progress
 	public static final String EXPORT_KEY_TYPE = "export_key_type";
 	public static final String EXPORT_ALL = "export_all";
 	public static final String EXPORT_KEY_RING_MASTER_KEY_ID = "export_key_ring_id";
+	
+	/* import key */
+	public static final String IMPORT_KEY_LIST = "import_key_list";
+	public static final String IMPORT_BYTES = "import_bytes";
+	public static final String RESULT_IMPORT_ADDED = "added";
+	public static final String RESULT_IMPORT_UPDATED = "updated";
+	public static final String RESULT_IMPORT_BAD = "bad";
 
 	/* keys */
 	public static final String RESULT_NEW_KEY = "new_key";
-
+	
+	/* query key */
+	public static final String QUERY_KEY_SERVER = "query_key_server";
+	public static final String QUERY_KEY_TYPE = "query_key_type";
+	public static final String QUERY_KEY_STRING = "query_key_string";
+	public static final String QUERY_KEY_ID = "query_key_id";
+	public static final String RESULT_QUERY_KEY_DATA = "query_key_data";
+	public static final String RESULT_QUERY_KEY_SEARCH_RESULT = "query_key_search_result";
 	/**
 	 * result
 	 */
@@ -231,7 +260,73 @@ public abstract class KeyIntentService extends IntentService implements Progress
 			} catch (Exception e) {
 				sendErrorToHandler(e);
 			}
-  } 
+		} else if (ACTION_QUERY_KEYRING.equals(action)) {
+			try {
+
+				/* Input */
+				int queryType = data.getInt(QUERY_KEY_TYPE);
+				String keyServer = data.getString(QUERY_KEY_SERVER);
+
+				String queryString = data.getString(QUERY_KEY_STRING);
+				long keyId = data.getLong(QUERY_KEY_ID);
+
+				/* Operation */
+				Bundle resultData = new Bundle();
+
+				HkpKeyServer server = new HkpKeyServer(keyServer);
+				if (queryType == Id.keyserver.search) {	
+					ArrayList<KeyInfo> searchResult = server.search(queryString);
+
+					resultData.putParcelableArrayList(RESULT_QUERY_KEY_SEARCH_RESULT, searchResult);
+				} else if (queryType == Id.keyserver.get) {
+					String keyData = server.get(keyId);
+
+					resultData.putString(RESULT_QUERY_KEY_DATA, keyData);
+				}
+
+				sendMessageToHandler(KeyIntentServiceHandler.MESSAGE_OKAY, resultData);
+			} catch (Exception e) {
+				sendErrorToHandler(e);
+			}
+		} else if (ACTION_IMPORT_KEYRING.equals(action)) {
+			try {
+
+				/* Input */
+				int target = data.getInt(TARGET);
+
+				/* Operation */
+				InputStream inStream = null;
+				long inLength = -1;
+				InputData inputData = null;
+				switch (target) {
+				case TARGET_BYTES: /* import key from bytes directly */
+					byte[] bytes = data.getByteArray(IMPORT_BYTES);
+
+					inStream = new ByteArrayInputStream(bytes);
+					inLength = bytes.length;
+
+					inputData = new InputData(inStream, inLength);
+
+					break;
+					
+				case TARGET_STREAM:
+					// TODO: not implemented
+					break;
+
+				}
+
+				Bundle resultData = new Bundle();
+
+				ArrayList<Long> keyIds = (ArrayList<Long>) data.getSerializable(IMPORT_KEY_LIST);
+
+				PgpImportExport pgpImportExport = new PgpImportExport(this, this);
+				resultData = pgpImportExport.importKeyRings(inputData, keyIds);
+
+				sendMessageToHandler(KeyIntentServiceHandler.MESSAGE_OKAY, resultData);
+			} catch (Exception e) {
+				sendErrorToHandler(e);
+			}
+		}
 	}
 
 	private void sendErrorToHandler(Exception e) {

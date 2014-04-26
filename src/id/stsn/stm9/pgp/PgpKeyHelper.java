@@ -185,4 +185,32 @@ public class PgpKeyHelper {
         return isCertificationKey(key.getPublicKey());
     }
 
+    public static String convertKeyToHex(long keyId) {
+        return convertKeyIdToHex(keyId >> 32) + convertKeyIdToHex(keyId);
+    }
+    
+    public static long convertHexToKeyId(String data) {
+        int len = data.length();
+        String s2 = data.substring(len - 8);
+        String s1 = data.substring(0, len - 8);
+        return (Long.parseLong(s1, 16) << 32) | Long.parseLong(s2, 16);
+    }
+    
+    public static String convertFingerprintToHex(byte[] fp) {
+    	String fingerPrint = "";
+    	for (int i = 0; i < fp.length; ++i) {
+    		if (i != 0 && i % 10 == 0) {
+    			fingerPrint += "  ";
+    		} else if (i != 0 && i % 2 == 0) {
+    			fingerPrint += " ";
+    		}
+    		String chunk = Integer.toHexString((fp[i] + 256) % 256).toUpperCase(Locale.US);
+    		while (chunk.length() < 2) {
+    			chunk = "0" + chunk;
+    		}
+    		fingerPrint += chunk;
+    	}
+
+    	return fingerPrint;
+    }
 }

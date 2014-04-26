@@ -309,47 +309,75 @@ public class ProviderHelper {
 			}
 		}
 		values.put(Keys.KEY_ID, key.getKeyID());
-        values.put(Keys.IS_MASTER_KEY, key.isMasterKey());
-        values.put(Keys.ALGORITHM, key.getPublicKey().getAlgorithm());
-        values.put(Keys.KEY_SIZE, key.getPublicKey().getBitStrength());
-        values.put(Keys.CAN_CERTIFY, (PgpKeyHelper.isCertificationKey(key) && has_private));
-        values.put(Keys.CAN_SIGN, (PgpKeyHelper.isSigningKey(key) && has_private));
-        values.put(Keys.CAN_ENCRYPT, PgpKeyHelper.isEncryptionKey(key));
-        values.put(Keys.IS_REVOKED, key.getPublicKey().isRevoked());
-        values.put(Keys.CREATION, PgpKeyHelper.getCreationDate(key).getTime() / 1000);
-        Date expiryDate = PgpKeyHelper.getExpiryDate(key);
-        if (expiryDate != null) {
-            values.put(Keys.EXPIRY, expiryDate.getTime() / 1000);
-        }
-        values.put(Keys.KEY_RING_ROW_ID, keyRingRowId);
-        values.put(Keys.KEY_DATA, key.getEncoded());
-        values.put(Keys.RANK, rank);
-
-        Uri uri = Keys.buildSecretKeysUri(Long.toString(keyRingRowId));
-
-        return ContentProviderOperation.newInsert(uri).withValues(values).build();
-    }
-
-
-		/**
-		 * Build ContentProviderOperation to add SecretUserIds to database corresponding to a keyRing
-		 * 
-		 * @param context
-		 * @param keyRingRowId
-		 * @param key
-		 * @param rank
-		 * @return
-		 * @throws IOException
-		 */
-		private static ContentProviderOperation buildSecretUserIdOperations(Context context,
-				long keyRingRowId, String userId, int rank) {
-			ContentValues values = new ContentValues();
-			values.put(UserIds.KEY_RING_ROW_ID, keyRingRowId);
-			values.put(UserIds.USER_ID, userId);
-			values.put(UserIds.RANK, rank);
-
-			Uri uri = UserIds.buildSecretUserIdsUri(Long.toString(keyRingRowId));
-
-			return ContentProviderOperation.newInsert(uri).withValues(values).build();
+		values.put(Keys.IS_MASTER_KEY, key.isMasterKey());
+		values.put(Keys.ALGORITHM, key.getPublicKey().getAlgorithm());
+		values.put(Keys.KEY_SIZE, key.getPublicKey().getBitStrength());
+		values.put(Keys.CAN_CERTIFY, (PgpKeyHelper.isCertificationKey(key) && has_private));
+		values.put(Keys.CAN_SIGN, (PgpKeyHelper.isSigningKey(key) && has_private));
+		values.put(Keys.CAN_ENCRYPT, PgpKeyHelper.isEncryptionKey(key));
+		values.put(Keys.IS_REVOKED, key.getPublicKey().isRevoked());
+		values.put(Keys.CREATION, PgpKeyHelper.getCreationDate(key).getTime() / 1000);
+		Date expiryDate = PgpKeyHelper.getExpiryDate(key);
+		if (expiryDate != null) {
+			values.put(Keys.EXPIRY, expiryDate.getTime() / 1000);
 		}
+		values.put(Keys.KEY_RING_ROW_ID, keyRingRowId);
+		values.put(Keys.KEY_DATA, key.getEncoded());
+		values.put(Keys.RANK, rank);
+
+		Uri uri = Keys.buildSecretKeysUri(Long.toString(keyRingRowId));
+
+		return ContentProviderOperation.newInsert(uri).withValues(values).build();
 	}
+
+
+	/**
+	 * Build ContentProviderOperation to add SecretUserIds to database corresponding to a keyRing
+	 * 
+	 * @param context
+	 * @param keyRingRowId
+	 * @param key
+	 * @param rank
+	 * @return
+	 * @throws IOException
+	 */
+	private static ContentProviderOperation buildSecretUserIdOperations(Context context,
+			long keyRingRowId, String userId, int rank) {
+		ContentValues values = new ContentValues();
+		values.put(UserIds.KEY_RING_ROW_ID, keyRingRowId);
+		values.put(UserIds.USER_ID, userId);
+		values.put(UserIds.RANK, rank);
+
+		Uri uri = UserIds.buildSecretUserIdsUri(Long.toString(keyRingRowId));
+
+		return ContentProviderOperation.newInsert(uri).withValues(values).build();
+	}
+
+
+	/**
+	 * Retrieves the actual PGPPublicKeyRing object from the database blob based on the maserKeyId
+	 * 
+	 * @param context
+	 * @param masterKeyId
+	 * @return
+	 */
+	public static PGPPublicKeyRing getPGPPublicKeyRingByMasterKeyId(Context context,
+			long masterKeyId) {
+		Uri queryUri = KeyRings.buildPublicKeyRingsByMasterKeyIdUri(Long.toString(masterKeyId));
+		return (PGPPublicKeyRing) getPGPKeyRing(context, queryUri);
+	}
+
+
+	/**
+	 * Retrieves the actual PGPSecretKeyRing object from the database blob based on the maserKeyId
+	 * 
+	 * @param context
+	 * @param masterKeyId
+	 * @return
+	 */
+	public static PGPSecretKeyRing getPGPSecretKeyRingByMasterKeyId(Context context,
+			long masterKeyId) {
+		Uri queryUri = KeyRings.buildSecretKeyRingsByMasterKeyIdUri(Long.toString(masterKeyId));
+		return (PGPSecretKeyRing) getPGPKeyRing(context, queryUri);
+	}
+}
