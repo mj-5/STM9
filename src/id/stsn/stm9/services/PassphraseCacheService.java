@@ -1,5 +1,14 @@
 package id.stsn.stm9.services;
 
+import id.stsn.stm9.pgp.PgpKeyHelper;
+import id.stsn.stm9.provider.ProviderHelper;
+
+import org.spongycastle.openpgp.PGPException;
+import org.spongycastle.openpgp.PGPPrivateKey;
+import org.spongycastle.openpgp.PGPSecretKey;
+import org.spongycastle.openpgp.operator.PBESecretKeyDecryptor;
+import org.spongycastle.openpgp.operator.jcajce.JcePBESecretKeyDecryptorBuilder;
+
 import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
@@ -12,7 +21,9 @@ import android.os.Message;
 import android.os.Messenger;
 import android.util.Log;
 
+//public class PassphraseCacheService extends Service {
 public class PassphraseCacheService extends Service {
+
     public static final String TAG = "stm-9" + ": PassphraseCacheService";
 
     public static final String ACTION_PASSPHRASE_CACHE_ADD = "id.stsn.stm9" + ".action." + "PASSPHRASE_CACHE_ADD";
@@ -39,7 +50,7 @@ public class PassphraseCacheService extends Service {
 
     	Intent intent = new Intent(context, PassphraseCacheService.class);
     	intent.setAction(ACTION_PASSPHRASE_CACHE_ADD);
-    	intent.putExtra(EXTRA_TTL, Preferences.getPreferences(context).getPassPhraseCacheTtl());
+//    	intent.putExtra(EXTRA_TTL, Preferences.getPreferences(context).getPassPhraseCacheTtl());
     	intent.putExtra(EXTRA_PASSPHRASE, passphrase);
     	intent.putExtra(EXTRA_KEY_ID, keyId);
 
@@ -114,5 +125,4 @@ public class PassphraseCacheService extends Service {
     }
 
     private final IBinder mBinder = new PassphraseCacheBinder();
-
 }
