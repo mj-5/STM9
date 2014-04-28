@@ -171,40 +171,12 @@ public class FileDialogFragment extends DialogFragment {
         }
     }
     
-    /**
-     * important This class from FileHelper
-     * 
-     * Opens the preferred installed file manager on Android and shows a toast if no manager is
-     * installed.
-     * 
-     * @param activity
-     * @param filename
-     *            default selected file, not supported by all file managers
-     * @param mimeType
-     *            can be text/plain for example
-     * @param requestCode
-     *            requestCode used to identify the result coming back from file manager to
-     *            onActivityResult() in your activity
-     */
-    public static void openFile(Activity activity, String filename, String mimeType, int requestCode) {
-        Intent intent = buildFileIntent(filename, mimeType);
+    public void setFilename(String filename) {
+        AlertDialog dialog = (AlertDialog) getDialog();
+        EditText filenameEditText = (EditText) dialog.findViewById(R.id.input);
 
-        try {
-            activity.startActivityForResult(intent, requestCode);
-        } catch (ActivityNotFoundException e) {
-            // No compatible file manager was found.
-            Toast.makeText(activity, R.string.no_filemanager_installed, Toast.LENGTH_SHORT).show();
+        if (filenameEditText != null) {
+            filenameEditText.setText(filename);
         }
-    }
-    
-    /* importnat : this class copy from FileHelper */
-    private static Intent buildFileIntent(String filename, String mimeType) {
-        Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
-        intent.addCategory(Intent.CATEGORY_OPENABLE);
-
-        intent.setData(Uri.parse("file://" + filename));
-        intent.setType(mimeType);
-
-        return intent;
     }
 }

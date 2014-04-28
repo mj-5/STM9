@@ -3,14 +3,13 @@ package id.stsn.stm9.fragment;
 import java.io.ByteArrayInputStream;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
-import java.io.InputStream;
 import java.util.List;
 
 import id.stsn.stm9.R;
 import id.stsn.stm9.services.ImportKeysAdapter;
 import id.stsn.stm9.services.ImportKeysListEntry;
 import id.stsn.stm9.services.ImportKeysListLoader;
-import id.stsn.stm9.utility.PositionAwareInputStream;
+import id.stsn.stm9.utility.InputData;
 
 import android.app.Activity;
 import android.os.Bundle;
@@ -154,32 +153,5 @@ public class ImportKeysListFragment extends SherlockListFragment implements
     public void onLoaderReset(Loader<List<ImportKeysListEntry>> loader) {
         // Clear the data in the adapter.
         mAdapter.clear();
-    }
-    
-    /**
-     * class from InputData
-     * @author 1009100850
-     *
-     */
-    public class InputData {
-    	private PositionAwareInputStream mInputStream;
-    	private long mSize;
-    	
-    	public InputData(InputStream inputStream, long size){
-    		mInputStream = new PositionAwareInputStream(inputStream);
-    		mSize = size;
-    	}
-    	
-    	public InputStream getInputStream(){
-    		return mInputStream;
-    	}
-    	
-    	public long getSize() {
-    		return mSize;
-    	}
-
-    	public long getStreamPosition() {
-    		return mInputStream.position();
-    	}
     }
 }

@@ -9,8 +9,8 @@ import org.spongycastle.openpgp.PGPKeyRing;
 import org.spongycastle.openpgp.PGPObjectFactory;
 import org.spongycastle.openpgp.PGPUtil;
 
+import id.stsn.stm9.utility.InputData;
 import id.stsn.stm9.utility.PositionAwareInputStream;
-import id.stsn.stm9.fragment.ImportKeysListFragment.InputData;
 
 import android.content.Context;
 import android.support.v4.content.AsyncTaskLoader;
@@ -39,6 +39,29 @@ public class ImportKeysListLoader extends AsyncTaskLoader<List<ImportKeysListEnt
         generateListOfKeyrings(mInputData);
 
         return data;
+    }
+
+    @Override
+    protected void onReset() {
+        super.onReset();
+
+        // Ensure the loader is stopped
+        onStopLoading();
+    }
+
+    @Override
+    protected void onStartLoading() {
+        forceLoad();
+    }
+
+    @Override
+    protected void onStopLoading() {
+        cancelLoad();
+    }
+
+    @Override
+    public void deliverResult(List<ImportKeysListEntry> data) {
+        super.deliverResult(data);
     }
 
     /**

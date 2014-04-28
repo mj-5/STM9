@@ -1,8 +1,8 @@
 package id.stsn.stm9.activity;
 
 import id.stsn.stm9.R;
-import id.stsn.stm9.activity.DecVerActivity;
-import id.stsn.stm9.activity.EncSignActivity;
+//import id.stsn.stm9.activity.DecVerActivity;
+//import id.stsn.stm9.activity.EncSignActivity;
 import id.stsn.stm9.activity.KeyListActivity;
 import id.stsn.stm9.activity.MasterKeyActivity;
 
@@ -40,19 +40,19 @@ public class MainMenuActivity extends Activity {
 			}
 		});
 
-		btnEncSign.setOnClickListener(new OnClickListener() {
-			@Override
-			public void onClick(View v) {
-				encSign();
-			}
-		});
-
-		btnDecVer.setOnClickListener(new OnClickListener() {
-			@Override
-			public void onClick(View v) {
-				decVer();
-			}
-		});
+//		btnEncSign.setOnClickListener(new OnClickListener() {
+//			@Override
+//			public void onClick(View v) {
+//				encSign();
+//			}
+//		});
+//
+//		btnDecVer.setOnClickListener(new OnClickListener() {
+//			@Override
+//			public void onClick(View v) {
+//				decVer();
+//			}
+//		});
 	}
 
 	protected void keyList() {
@@ -65,13 +65,13 @@ public class MainMenuActivity extends Activity {
 		startActivity(i);		
 	}
 
-	protected void encSign() {
-		Intent i = new Intent(this, EncSignActivity.class);
-		startActivity(i);		
-	}
-
-	protected void decVer() {
-		Intent i = new Intent(this, DecVerActivity.class);
-		startActivity(i);		
-	}
+//	protected void encSign() {
+//		Intent i = new Intent(this, EncSignActivity.class);
+//		startActivity(i);		
+//	}
+//
+//	protected void decVer() {
+//		Intent i = new Intent(this, DecVerActivity.class);
+//		startActivity(i);		
+//	}
 }

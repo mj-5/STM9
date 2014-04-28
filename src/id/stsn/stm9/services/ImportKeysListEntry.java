@@ -1,8 +1,5 @@
 package id.stsn.stm9.services;
 
-import id.stsn.stm9.pgp.PgpKeyHelper;
-import id.stsn.stm9.utility.IterableIterator;
-
 import java.io.Serializable;
 import java.util.ArrayList;
 
@@ -10,16 +7,24 @@ import org.spongycastle.openpgp.PGPKeyRing;
 import org.spongycastle.openpgp.PGPPublicKey;
 import org.spongycastle.openpgp.PGPSecretKeyRing;
 
+import id.stsn.stm9.pgp.PgpKeyHelper;
+import id.stsn.stm9.utility.AlgorithmNames;
+import id.stsn.stm9.utility.IterableIterator;
+
 public class ImportKeysListEntry implements Serializable {
     private static final long serialVersionUID = -7797972103284992662L;
     public ArrayList<String> userIds;
     public long keyId;
+
     public boolean revoked;
+    // public Date date;
     public String fingerPrint;
     public String hexKeyId;
     public int bitStrength;
     public String algorithm;
     public boolean secretKey;
+    AlgorithmNames algorithmNames;
+
     private boolean selected;
 
     /**
@@ -37,7 +42,7 @@ public class ImportKeysListEntry implements Serializable {
     public void setSelected(boolean selected) {
         this.selected = selected;
     }
-    
+
     /**
      * Constructor based on key object, used for import from NFC, QR Codes, files
      * 

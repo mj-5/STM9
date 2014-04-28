@@ -3,11 +3,8 @@ package id.stsn.stm9.activity;
 import java.util.ArrayList;
 import java.util.List;
 
-import id.stsn.stm9.fragment.DeleteFileDialogFragment;
 import id.stsn.stm9.R;
-import id.stsn.stm9.fragment.FileDialogFragment;
 import id.stsn.stm9.fragment.ImportKeysListFragment;
-import id.stsn.stm9.fragment.ImportKeysServerFragment;
 import id.stsn.stm9.services.ActionBarHelper;
 import id.stsn.stm9.services.ImportKeysListEntry;
 import id.stsn.stm9.services.KeyIntentService;
@@ -20,17 +17,14 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.os.Message;
 import android.os.Messenger;
-import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentTransaction;
 import android.view.View;
 import android.widget.Toast;
 import android.util.Log;
 
-import com.actionbarsherlock.app.ActionBar.OnNavigationListener;
 import com.actionbarsherlock.app.SherlockFragmentActivity;
 import com.actionbarsherlock.view.MenuItem;
 
-public class ImportKeysActivity extends SherlockFragmentActivity implements OnNavigationListener {
+public class ImportKeysActivity extends SherlockFragmentActivity {
     public static final String ACTION_IMPORT_KEY = "id.stsn.stm9" + ".action." + "IMPORT_KEY";
 
     // only used by IMPORT
@@ -38,9 +32,7 @@ public class ImportKeysActivity extends SherlockFragmentActivity implements OnNa
 
     protected boolean mDeleteAfterImport = false;
 
-    FileDialogFragment mFileDialog;
     ImportKeysListFragment mListFragment;
-    OnNavigationListener mOnNavigationListener;
     String[] mNavigationStrings;
 
     @Override
@@ -67,31 +59,25 @@ public class ImportKeysActivity extends SherlockFragmentActivity implements OnNa
          * Android Standard Actions
          */
         if (Intent.ACTION_VIEW.equals(action)) {
-        	
-            action = ACTION_IMPORT_KEY;
+        	action = ACTION_IMPORT_KEY;
         }
 
         /**
-         * App Actions
+         * STM9 Actions
          */
         if (ACTION_IMPORT_KEY.equals(action)) {
         	if (extras.containsKey(EXTRA_KEY_BYTES)) {
         		byte[] importData = intent.getByteArrayExtra(EXTRA_KEY_BYTES);
 
-        		/* directly load data */ 
+        		// directly load data
         		startListFragment(savedInstanceState, importData, null);
         	}
-        }
+        } 
     }
 
     private void startListFragment(Bundle savedInstanceState, byte[] bytes, String filename) {
-        // Check that the activity is using the layout version with
-        // the fragment_container FrameLayout
         if (findViewById(R.id.import_keys_list_container) != null) {
 
-            // However, if we're being restored from a previous state,
-            // then we don't need to do anything and should return or else
-            // we could end up with overlapping fragments.
             if (savedInstanceState != null) {
                 return;
             }
@@ -100,38 +86,12 @@ public class ImportKeysActivity extends SherlockFragmentActivity implements OnNa
             mListFragment = ImportKeysListFragment.newInstance(bytes, filename);
 
             // Add the fragment to the 'fragment_container' FrameLayout
-            // NOTE: We use commitAllowingStateLoss() to prevent weird crashes!
-            getSupportFragmentManager().beginTransaction()
-                    .replace(R.id.import_keys_list_container, mListFragment)
+            // NOTE: use commitAllowingStateLoss() to prevent weird crashes!
+            getSupportFragmentManager().beginTransaction().replace(R.id.import_keys_list_container, mListFragment)
                     .commitAllowingStateLoss();
             // do it immediately!
             getSupportFragmentManager().executePendingTransactions();
         }
-    }
-
-    @Override
-    public boolean onNavigationItemSelected(int itemPosition, long itemId) {
-        // Create new fragment from our own Fragment class
-        switch (itemPosition) {
-        case 0:
-            loadFragment(ImportKeysServerFragment.class, null, mNavigationStrings[itemPosition]);
-            break;
-
-        default:
-            break;
-        }
-        return true;
-    }
-
-    private void loadFragment(Class<?> clss, Bundle args, String tag) {
-        Fragment fragment = Fragment.instantiate(this, clss.getName(), args);
-
-        FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
-        // Replace whatever is in the fragment container with this fragment
-        // and give the fragment a tag name equal to the string at the position selected
-        ft.replace(R.id.import_navigation_fragment, fragment, tag);
-        // Apply changes
-        ft.commit();
     }
 
     public void loadCallback(byte[] importData, String importFilename) {
@@ -184,7 +144,7 @@ public class ImportKeysActivity extends SherlockFragmentActivity implements OnNa
             if (mListFragment.getKeyBytes() != null) {
                 data.putInt(KeyIntentService.TARGET, KeyIntentService.TARGET_BYTES);
                 data.putByteArray(KeyIntentService.IMPORT_BYTES, mListFragment.getKeyBytes());
-            }
+            } 
 
             intent.putExtra(KeyIntentService.EXTRA_DATA, data);
 
@@ -232,12 +192,7 @@ public class ImportKeysActivity extends SherlockFragmentActivity implements OnNa
                                     });
                             alert.setCancelable(true);
                             alert.create().show();
-                        } else if (mDeleteAfterImport) {
-                            // everything went well, so now delete, if that was turned on
-                            DeleteFileDialogFragment deleteFileDialog = DeleteFileDialogFragment
-                                    .newInstance(mListFragment.getImportFilename());
-                            deleteFileDialog.show(getSupportFragmentManager(), "deleteDialog");
-                        }
+                        } 
                     }
                 };
             };

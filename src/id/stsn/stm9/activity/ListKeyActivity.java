@@ -69,6 +69,7 @@ public class ListKeyActivity extends SherlockFragmentActivity {
 					String path = data.getData().getPath();
 					Log.d("Stm9", "path=" + path);
 
+					mFileDialog.setFilename(path);
 				} catch (NullPointerException e) {
 					Log.e("Stm9", "Nullpointer!", e);
 				}
