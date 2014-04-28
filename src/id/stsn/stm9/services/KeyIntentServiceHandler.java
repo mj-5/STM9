@@ -15,9 +15,13 @@ public class KeyIntentServiceHandler extends Handler {
     // possible messages send from this service to handler on ui
     public static final int MESSAGE_OKAY = 1;
     public static final int MESSAGE_EXCEPTION = 2;
+    public static final int MESSAGE_UPDATE_PROGRESS = 3;
 
   // possible data keys for messages
   public static final String DATA_ERROR = "error";
+  public static final String DATA_PROGRESS = "progress";
+  public static final String DATA_PROGRESS_MAX = "max";
+  public static final String DATA_MESSAGE = "message";
 
     Activity mActivity;
     ProgressDialogFragment mProgressDialogFragment;

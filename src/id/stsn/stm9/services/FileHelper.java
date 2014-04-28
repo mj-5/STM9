@@ -6,6 +6,8 @@ import android.app.Activity;
 import android.content.ActivityNotFoundException;
 import android.content.Intent;
 import android.net.Uri;
+import android.os.Environment;
+import android.support.v4.app.Fragment;
 import android.widget.Toast;
 
 public class FileHelper {
@@ -30,4 +32,34 @@ public class FileHelper {
 
         return intent;
     }
+    
+
+    /**
+     * Checks if external storage is mounted if file is located on external storage
+     * 
+     * @param file
+     * @return true if storage is mounted
+     */
+    public static boolean isStorageMounted(String file) {
+        if (file.startsWith(Environment.getExternalStorageDirectory().getAbsolutePath())) {
+            if (!Environment.getExternalStorageState().equals(Environment.MEDIA_MOUNTED)) {
+                return false;
+            }
+        }
+
+        return true;
+    }
+    
+    public static void openFile(Fragment fragment, String filename, String mimeType, int requestCode) {
+        Intent intent = buildFileIntent(filename, mimeType);
+
+        try {
+            fragment.startActivityForResult(intent, requestCode);
+        } catch (ActivityNotFoundException e) {
+            // No compatible file manager was found.
+            Toast.makeText(fragment.getActivity(), R.string.no_filemanager_installed,
+                    Toast.LENGTH_SHORT).show();
+        }
+    }
+
 }

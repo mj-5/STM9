@@ -494,4 +494,53 @@ public class ProviderHelper {
         Uri queryUri = KeyRings.buildPublicKeyRingsUri(Long.toString(rowId));
         return (PGPPublicKeyRing) getPGPKeyRing(context, queryUri);
     }
+    
+
+    /**
+     * Retrieves the actual PGPPublicKey object from the database blob associated with a key with
+     * this keyId
+     * 
+     * @param context
+     * @param keyId
+     * @return
+     */
+    public static PGPPublicKey getPGPPublicKeyByKeyId(Context context, long keyId) {
+        PGPPublicKeyRing keyRing = getPGPPublicKeyRingByKeyId(context, keyId);
+        if (keyRing == null) {
+            return null;
+        }
+
+        return keyRing.getPublicKey(keyId);
+    }
+
+    /**
+     * Retrieves the actual PGPPublicKeyRing object from the database blob associated with a key
+     * with this keyId
+     * 
+     * @param context
+     * @param keyId
+     * @return
+     */
+    public static PGPPublicKeyRing getPGPPublicKeyRingByKeyId(Context context, long keyId) {
+        Uri queryUri = KeyRings.buildPublicKeyRingsByKeyIdUri(Long.toString(keyId));
+        return (PGPPublicKeyRing) getPGPKeyRing(context, queryUri);
+    }
+    
+    /**
+     * Retrieves the actual PGPSecretKey object from the database blob associated with a key with
+     * this keyId
+     * 
+     * @param context
+     * @param keyId
+     * @return
+     */
+    public static PGPSecretKey getPGPSecretKeyByKeyId(Context context, long keyId) {
+        PGPSecretKeyRing keyRing = getPGPSecretKeyRingByKeyId(context, keyId);
+        if (keyRing == null) {
+            return null;
+        }
+
+        return keyRing.getSecretKey(keyId);
+    }
+
 }

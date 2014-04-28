@@ -1,7 +1,10 @@
 package id.stsn.stm9.services;
 
 import java.io.ByteArrayInputStream;
+import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
+import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 
@@ -11,9 +14,9 @@ import org.spongycastle.openpgp.PGPSecretKeyRing;
 
 import id.stsn.stm9.Id;
 import id.stsn.stm9.R;
-//import id.stsn.stm9.fragment.ImportKeysListFragment.InputData;
 import id.stsn.stm9.pgp.PgpConvert; //v
 import id.stsn.stm9.pgp.PgpGeneralException; //v
+import id.stsn.stm9.pgp.PgpHelper;
 import id.stsn.stm9.pgp.PgpImportExport; //v
 import id.stsn.stm9.pgp.PgpKeyOperation; //v
 import id.stsn.stm9.provider.ProviderHelper;
@@ -34,7 +37,7 @@ import android.util.Log;
  * Service ini mengandung semua operasi yang penting untuk APG.
  * Service ini menerima Intens data dari activities, antrian intens, mengeksekusi, dan berhenti setelah melakukannya.
  */
-public abstract class KeyIntentService extends IntentService implements ProgressDialogUpdater {
+public class KeyIntentService extends IntentService implements ProgressDialogUpdater {
 
 	/* pemberian dari intents */
 	public static final String EXTRA_MESSENGER = "messenger";
@@ -48,7 +51,7 @@ public abstract class KeyIntentService extends IntentService implements Progress
 	public static final String ACTION_QUERY_KEYRING = "id.stsn.stm9" + ".action." + "QUERY_KEYRING";
 	public static final String ACTION_IMPORT_KEYRING = "id.stsn.stm9" + ".action." + "IMPORT_KEYRING";
 	public static final String ACTION_UPLOAD_KEYRING = "id.stsn.stm9" + ".action." + "UPLOAD_KEYRING";
-	
+
 	/* data bundle kunci2 */
 
 	/* encrypt, decrypt, import export */
@@ -56,6 +59,7 @@ public abstract class KeyIntentService extends IntentService implements Progress
 	  
 	/* target */ 
 	public static final int TARGET_BYTES = 1;
+    public static final int TARGET_FILE = 2;
 	public static final int TARGET_STREAM = 3;
 
 	/* simpan keyring */ 
@@ -82,6 +86,7 @@ public abstract class KeyIntentService extends IntentService implements Progress
 	/* import key */
 	public static final String IMPORT_KEY_LIST = "import_key_list";
 	public static final String IMPORT_BYTES = "import_bytes";
+    public static final String IMPORT_FILENAME = "import_filename";
 	public static final String RESULT_IMPORT_ADDED = "added";
 	public static final String RESULT_IMPORT_UPDATED = "updated";
 	public static final String RESULT_IMPORT_BAD = "bad";
@@ -333,9 +338,7 @@ public abstract class KeyIntentService extends IntentService implements Progress
 			} catch (Exception e) {
 				sendErrorToHandler(e);
 			}
-		}
-		
-		else if (ACTION_UPLOAD_KEYRING.equals(action)) {
+		} else if (ACTION_UPLOAD_KEYRING.equals(action)) {
             try {
 
                 /* Input */
@@ -359,7 +362,7 @@ public abstract class KeyIntentService extends IntentService implements Progress
             } catch (Exception e) {
                 sendErrorToHandler(e);
             }
-        }
+		}
 	}
 
 	private void sendErrorToHandler(Exception e) {
@@ -397,4 +400,29 @@ public abstract class KeyIntentService extends IntentService implements Progress
 	private void sendMessageToHandler(Integer arg1) {
 		sendMessageToHandler(arg1, null, null);
 	}
+	
+    /**
+     * Set progress of ProgressDialog by sending message to handler on UI thread
+     */
+    public void setProgress(String message, int progress, int max) {
+        Log.d("stm-9", "Send message by setProgress with progress=" + progress + ", max="
+                + max);
+
+        Bundle data = new Bundle();
+        if (message != null) {
+            data.putString(KeyIntentServiceHandler.DATA_MESSAGE, message);
+        }
+        data.putInt(KeyIntentServiceHandler.DATA_PROGRESS, progress);
+        data.putInt(KeyIntentServiceHandler.DATA_PROGRESS_MAX, max);
+
+        sendMessageToHandler(KeyIntentServiceHandler.MESSAGE_UPDATE_PROGRESS, null, data);
+    }
+
+    public void setProgress(int resourceId, int progress, int max) {
+        setProgress(getString(resourceId), progress, max);
+    }
+
+    public void setProgress(int progress, int max) {
+        setProgress(null, progress, max);
+    }
 }

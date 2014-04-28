@@ -57,13 +57,24 @@ public class HkpKeyServer extends KeyServer {
     private String mHost;
     private short mPort = 11371;
 
-    public static Pattern PUB_KEY_LINE = Pattern.compile(
+    // example:
+    // pub 2048R/<a href="/pks/lookup?op=get&search=0x887DF4BE9F5C9090">9F5C9090</a> 2009-08-17 <a
+    // href="/pks/lookup?op=vindex&search=0x887DF4BE9F5C9090">Jörg Runge
+    // &lt;joerg@joergrunge.de&gt;</a>
+    public static Pattern PUB_KEY_LINE = Pattern
+            .compile(
                     "pub +([0-9]+)([a-z]+)/.*?0x([0-9a-z]+).*? +([0-9-]+) +(.+)[\n\r]+((?:    +.+[\n\r]+)*)",
                     Pattern.CASE_INSENSITIVE);
-    public static Pattern USER_ID_LINE = Pattern.compile("^   +(.+)$", Pattern.MULTILINE | Pattern.CASE_INSENSITIVE);
+    public static Pattern USER_ID_LINE = Pattern.compile("^   +(.+)$", Pattern.MULTILINE
+            | Pattern.CASE_INSENSITIVE);
 
     public HkpKeyServer(String host) {
         mHost = host;
+    }
+
+    public HkpKeyServer(String host, short port) {
+        mHost = host;
+        mPort = port;
     }
 
     static private String readAll(InputStream in, String encoding) throws IOException {

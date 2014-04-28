@@ -11,6 +11,10 @@ import org.spongycastle.openpgp.PGPSecretKey;
 import org.spongycastle.openpgp.PGPSignature;
 import org.spongycastle.openpgp.PGPSignatureSubpacketVector;
 
+import android.content.Context;
+import android.util.Log;
+
+import id.stsn.stm9.provider.ProviderHelper;
 import id.stsn.stm9.utility.IterableIterator;
 
 public class PgpKeyHelper {
@@ -212,5 +216,20 @@ public class PgpKeyHelper {
     	}
 
     	return fingerPrint;
+    }
+    
+    public static String getFingerPrint(Context context, long keyId) {
+        PGPPublicKey key = ProviderHelper.getPGPPublicKeyByKeyId(context, keyId);
+        // if it is no public key get it from your own keys...
+        if (key == null) {
+            PGPSecretKey secretKey = ProviderHelper.getPGPSecretKeyByKeyId(context, keyId);
+            if (secretKey == null) {
+                Log.e("Stm-9", "Key could not be found!");
+                return null;
+            }
+            key = secretKey.getPublicKey();
+        }
+
+        return convertFingerprintToHex(key.getFingerprint());
     }
 }
