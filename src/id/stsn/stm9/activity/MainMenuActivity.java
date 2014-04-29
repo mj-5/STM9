@@ -40,13 +40,13 @@ public class MainMenuActivity extends Activity {
 			}
 		});
 
-//		btnEncSign.setOnClickListener(new OnClickListener() {
-//			@Override
-//			public void onClick(View v) {
-//				encSign();
-//			}
-//		});
-//
+		btnEncSign.setOnClickListener(new OnClickListener() {
+			@Override
+			public void onClick(View v) {
+				encSign();
+			}
+		});
+
 //		btnDecVer.setOnClickListener(new OnClickListener() {
 //			@Override
 //			public void onClick(View v) {
@@ -65,11 +65,11 @@ public class MainMenuActivity extends Activity {
 		startActivity(i);		
 	}
 
-//	protected void encSign() {
-//		Intent i = new Intent(this, EncSignActivity.class);
-//		startActivity(i);		
-//	}
-//
+	protected void encSign() {
+		Intent i = new Intent(this, EncSignActivity.class);
+		startActivity(i);		
+	}
+
 //	protected void decVer() {
 //		Intent i = new Intent(this, DecVerActivity.class);
 //		startActivity(i);		

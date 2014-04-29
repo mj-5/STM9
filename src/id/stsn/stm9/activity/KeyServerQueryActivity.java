@@ -1,8 +1,5 @@
 package id.stsn.stm9.activity;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import android.app.Activity;
 import android.app.ProgressDialog;
 import android.content.Context;
@@ -30,6 +27,10 @@ import android.widget.TextView;
 import android.widget.TextView.OnEditorActionListener;
 import android.widget.Toast;
 import android.util.Log;
+import com.actionbarsherlock.app.SherlockFragmentActivity;
+import com.actionbarsherlock.view.MenuItem;
+import java.util.ArrayList;
+import java.util.List;
 
 import id.stsn.stm9.Id;
 import id.stsn.stm9.R;
@@ -39,15 +40,12 @@ import id.stsn.stm9.services.KeyIntentServiceHandler;
 import id.stsn.stm9.services.Preferences;
 import id.stsn.stm9.utility.KeyServer.KeyInfo;
 
-import com.actionbarsherlock.app.SherlockFragmentActivity;
-import com.actionbarsherlock.view.MenuItem;
-
 public class KeyServerQueryActivity extends SherlockFragmentActivity {
 
-    // possible intent actions for this activity
     public static final String ACTION_LOOK_UP_KEY_ID = "id.stsn.stm9" + ".action." + "LOOK_UP_KEY_ID";
 
-    public static final String ACTION_LOOK_UP_KEY_ID_AND_RETURN = "id.stsn.stm9" + ".action." + "LOOK_UP_KEY_ID_AND_RETURN";
+    public static final String ACTION_LOOK_UP_KEY_ID_AND_RETURN = "id.stsn.stm9" + ".action."
+            + "LOOK_UP_KEY_ID_AND_RETURN";
 
     public static final String EXTRA_KEY_ID = "key_id";
 
@@ -78,7 +76,7 @@ public class KeyServerQueryActivity extends SherlockFragmentActivity {
         switch (item.getItemId()) {
 
             case android.R.id.home:
-                /* app icon in Action Bar clicked; go home */
+                // app icon in Action Bar clicked; go home
                 Intent intent = new Intent(this, KeyListActivity.class);
                 intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
                 startActivity(intent);
@@ -104,8 +102,9 @@ public class KeyServerQueryActivity extends SherlockFragmentActivity {
         mList.setAdapter(mAdapter);
 
         mKeyServer = (Spinner)findViewById(R.id.keyServer);
-        ArrayAdapter<String> adapter = new ArrayAdapter<String>(this, android.R.layout.simple_spinner_item, 
-        		Preferences.getPreferences(this).getKeyServers());
+        ArrayAdapter<String> adapter = new ArrayAdapter<String>(this,
+                android.R.layout.simple_spinner_item, Preferences.getPreferences(this)
+                        .getKeyServers());
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         mKeyServer.setAdapter(adapter);
         if (adapter.getCount() > 0) {
@@ -170,12 +169,12 @@ public class KeyServerQueryActivity extends SherlockFragmentActivity {
     private void start() {
         Log.d("stm-9", "start search with service");
 
-        /* Send all information needed to service to query keys in other thread */ 
+        // Send all information needed to service to query keys in other thread
         Intent intent = new Intent(this, KeyIntentService.class);
 
         intent.setAction(KeyIntentService.ACTION_QUERY_KEYRING);
 
-        /* fill values for this action */ 
+        // fill values for this action
         Bundle data = new Bundle();
 
         String server = (String)mKeyServer.getSelectedItem();
@@ -191,29 +190,31 @@ public class KeyServerQueryActivity extends SherlockFragmentActivity {
 
         intent.putExtra(KeyIntentService.EXTRA_DATA, data);
 
-        /* Message is received after querying is done in ApgService */ 
+        // Message is received after querying is done in ApgService
         KeyIntentServiceHandler saveHandler = new KeyIntentServiceHandler(this,
                 R.string.proses_querying, ProgressDialog.STYLE_SPINNER) {
             @Override
             public void handleMessage(Message message) {
-                /* handle messages by standard ApgHandler first */ 
+                // handle messages by standard ApgHandler first
                 super.handleMessage(message);
 
                 if (message.arg1 == KeyIntentServiceHandler.MESSAGE_OKAY) {
-                    /* get returned data bundle */ 
+                    // get returned data bundle
                     Bundle returnData = message.getData();
 
                     if (mQueryType == Id.keyserver.search) {
                         mSearchResult = returnData
                                 .getParcelableArrayList(KeyIntentService.RESULT_QUERY_KEY_SEARCH_RESULT);
                     } else if (mQueryType == Id.keyserver.get) {
-                        mKeyData = returnData.getString(KeyIntentService.RESULT_QUERY_KEY_DATA);
+                        mKeyData = returnData
+                                .getString(KeyIntentService.RESULT_QUERY_KEY_DATA);
                     }
 
                     if (mQueryType == Id.keyserver.search) {
                         if (mSearchResult != null) {
-                            Toast.makeText(KeyServerQueryActivity.this,getString(R.string.keys_found, 
-                            		mSearchResult.size()),Toast.LENGTH_SHORT).show();
+                            Toast.makeText(KeyServerQueryActivity.this,
+                                    getString(R.string.keys_found, mSearchResult.size()),
+                                    Toast.LENGTH_SHORT).show();
                             mAdapter.setKeys(mSearchResult);
                         }
                     } else if (mQueryType == Id.keyserver.get) {
@@ -229,9 +230,11 @@ public class KeyServerQueryActivity extends SherlockFragmentActivity {
                             finish();
                         } else {
                             if (mKeyData != null) {
-                                Intent intent = new Intent(KeyServerQueryActivity.this, ImportKeysActivity.class);
+                                Intent intent = new Intent(KeyServerQueryActivity.this,
+                                        ImportKeysActivity.class);
                                 intent.setAction(ImportKeysActivity.ACTION_IMPORT_KEY);
-                                intent.putExtra(ImportKeysActivity.EXTRA_KEY_BYTES, mKeyData.getBytes());
+                                intent.putExtra(ImportKeysActivity.EXTRA_KEY_BYTES,
+                                        mKeyData.getBytes());
                                 startActivity(intent);
                             }
                         }
