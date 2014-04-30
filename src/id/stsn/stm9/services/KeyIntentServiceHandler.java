@@ -25,6 +25,10 @@ public class KeyIntentServiceHandler extends Handler {
 
     Activity mActivity;
     ProgressDialogFragment mProgressDialogFragment;
+    
+    public KeyIntentServiceHandler(Activity activity) {
+        this.mActivity = activity;
+    }
 
     public KeyIntentServiceHandler(Activity activity, int progressDialogMessageId, int progressDialogStyle) {
         this.mActivity = activity;
@@ -58,6 +62,8 @@ public class KeyIntentServiceHandler extends Handler {
             if (data.containsKey(DATA_ERROR)) {
                 Toast.makeText(mActivity, mActivity.getString(R.string.error_message, data.getString(DATA_ERROR)), Toast.LENGTH_SHORT).show();
             }
+            
+            break;
 
         default:
             break;

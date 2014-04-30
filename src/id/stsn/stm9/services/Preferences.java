@@ -3,7 +3,12 @@ package id.stsn.stm9.services;
 import android.content.Context;
 import android.content.SharedPreferences;
 
+import id.stsn.stm9.Id;
+
 import java.util.Vector;
+
+import org.spongycastle.bcpg.HashAlgorithmTags;
+import org.spongycastle.openpgp.PGPEncryptedData;
 
 /**
  * Singleton Implementation of a Preference Helper
@@ -39,4 +44,37 @@ public class Preferences {
         }
         return servers.toArray(chunks);
     }
+    
+    public int getDefaultEncryptionAlgorithm() {
+        return mSharedPreferences.getInt("defaultEncryptionAlgorithm",
+                PGPEncryptedData.AES_128);
+    }
+
+    public int getDefaultHashAlgorithm() {
+        return mSharedPreferences.getInt("defaultHashAlgorithm",
+                HashAlgorithmTags.SHA1);
+    }
+
+    public boolean getForceV3Signatures() {
+        return mSharedPreferences.getBoolean("forceV3Signatures", false);
+    }
+    
+
+    public int getDefaultMessageCompression() {
+        return mSharedPreferences.getInt("defaultMessageCompression",
+                Id.pilihan.compression.zip);
+    }
+
+    /**
+     * bisa dihapus
+     */
+    public boolean getDefaultAsciiArmour() {
+        return mSharedPreferences.getBoolean("defaultAsciiArmour", false);
+    }
+
+    public int getDefaultFileCompression() {
+        return mSharedPreferences.getInt("defaultFileCompression",
+                Id.pilihan.compression.none);
+    }
+
 }

@@ -4,11 +4,14 @@ import id.stsn.stm9.R;
 
 import android.app.Activity;
 import android.content.ActivityNotFoundException;
+import android.content.Context;
 import android.content.Intent;
+import android.database.Cursor;
 import android.net.Uri;
 import android.os.Environment;
 import android.support.v4.app.Fragment;
 import android.widget.Toast;
+import android.util.Log;
 
 public class FileHelper {
 
@@ -50,16 +53,4 @@ public class FileHelper {
         return true;
     }
     
-    public static void openFile(Fragment fragment, String filename, String mimeType, int requestCode) {
-        Intent intent = buildFileIntent(filename, mimeType);
-
-        try {
-            fragment.startActivityForResult(intent, requestCode);
-        } catch (ActivityNotFoundException e) {
-            // No compatible file manager was found.
-            Toast.makeText(fragment.getActivity(), R.string.no_filemanager_installed,
-                    Toast.LENGTH_SHORT).show();
-        }
-    }
-
 }

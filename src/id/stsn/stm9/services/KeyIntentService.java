@@ -1,11 +1,13 @@
 package id.stsn.stm9.services;
 
 import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.util.ArrayList;
 
 import org.spongycastle.openpgp.PGPPublicKeyRing;
@@ -19,14 +21,18 @@ import id.stsn.stm9.pgp.PgpGeneralException; //v
 import id.stsn.stm9.pgp.PgpHelper;
 import id.stsn.stm9.pgp.PgpImportExport; //v
 import id.stsn.stm9.pgp.PgpKeyOperation; //v
+import id.stsn.stm9.pgp.PgpOperation;
 import id.stsn.stm9.provider.ProviderHelper;
+//import id.stsn.stm9.provider.KeyContract.DataStream;
 import id.stsn.stm9.utility.HkpKeyServer;
 import id.stsn.stm9.utility.KeyServer.KeyInfo;
 import id.stsn.stm9.utility.ProgressDialogUpdater; //v
 import id.stsn.stm9.utility.InputData;
 
 import android.app.IntentService;
+import android.content.Context;
 import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
 import android.os.Message;
 import android.os.Messenger;
@@ -51,6 +57,8 @@ public class KeyIntentService extends IntentService implements ProgressDialogUpd
 	public static final String ACTION_QUERY_KEYRING = "id.stsn.stm9" + ".action." + "QUERY_KEYRING";
 	public static final String ACTION_IMPORT_KEYRING = "id.stsn.stm9" + ".action." + "IMPORT_KEYRING";
 	public static final String ACTION_UPLOAD_KEYRING = "id.stsn.stm9" + ".action." + "UPLOAD_KEYRING";
+	public static final String ACTION_ENCRYPT_SIGN = "id.stsn.stm9.stm_9" + ".action." + "ENCRYPT_SIGN";
+
 
 	/* data bundle kunci2 */
 
@@ -112,6 +120,20 @@ public class KeyIntentService extends IntentService implements ProgressDialogUpd
 	public static final String UPLOAD_KEY_SERVER = "upload_key_server";
 	public static final String UPLOAD_KEY_KEYRING_ROW_ID = "upload_key_ring_id";
 
+	/* encrypt dan sign */ 
+	public static final String ENCRYPT_SECRET_KEY_ID = "secret_key_id";
+	public static final String ENCRYPT_USE_ASCII_ARMOR = "use_ascii_armor";
+	public static final String ENCRYPT_ENCRYPTION_KEYS_IDS = "encryption_keys_ids";
+	public static final String ENCRYPT_COMPRESSION_ID = "compression_id";
+	public static final String ENCRYPT_GENERATE_SIGNATURE = "generate_signature";
+	public static final String ENCRYPT_SIGN_ONLY = "sign_only";
+	public static final String ENCRYPT_MESSAGE_BYTES = "message_bytes";
+
+	  /* encrypt sign result */
+	  public static final String RESULT_SIGNATURE_BYTES = "signature_data";
+	  public static final String RESULT_SIGNATURE_STRING = "signature_text";
+	  public static final String RESULT_ENCRYPTED_STRING = "encrypted_message";
+	  public static final String RESULT_ENCRYPTED_BYTES = "encrypted_data";
 
 	Messenger vMessenger;
 
@@ -359,6 +381,141 @@ public class KeyIntentService extends IntentService implements ProgressDialogUpd
                 }
 
                 sendMessageToHandler(KeyIntentServiceHandler.MESSAGE_OKAY);
+            } catch (Exception e) {
+                sendErrorToHandler(e);
+            }
+		} else if (ACTION_ENCRYPT_SIGN.equals(action)) {
+            try {
+                /* Input */
+                int target = data.getInt(TARGET);
+
+                long secretKeyId = data.getLong(ENCRYPT_SECRET_KEY_ID);
+                String encryptionPassphrase = data.getString(GENERATE_KEY_SYMMETRIC_PASSPHRASE);
+
+                boolean useAsciiArmor = data.getBoolean(ENCRYPT_USE_ASCII_ARMOR);
+                long encryptionKeyIds[] = data.getLongArray(ENCRYPT_ENCRYPTION_KEYS_IDS);
+                int compressionId = data.getInt(ENCRYPT_COMPRESSION_ID);
+                boolean generateSignature = data.getBoolean(ENCRYPT_GENERATE_SIGNATURE);
+                boolean signOnly = data.getBoolean(ENCRYPT_SIGN_ONLY);
+
+                InputStream inStream = null;
+                long inLength = -1;
+                InputData inputData = null;
+                OutputStream outStream = null;
+                String streamFilename = null;
+                switch (target) {
+                case TARGET_BYTES: /* encrypting bytes directly */
+                    byte[] bytes = data.getByteArray(ENCRYPT_MESSAGE_BYTES);
+
+                    inStream = new ByteArrayInputStream(bytes);
+                    inLength = bytes.length;
+
+                    inputData = new InputData(inStream, inLength);
+                    outStream = new ByteArrayOutputStream();
+
+                    break;
+//                case TARGET_FILE: /* encrypting file */
+//                    String inputFile = data.getString(ENCRYPT_INPUT_FILE);
+//                    String outputFile = data.getString(ENCRYPT_OUTPUT_FILE);
+//
+//                    // check if storage is ready
+//                    if (!FileHelper.isStorageMounted(inputFile)
+//                            || !FileHelper.isStorageMounted(outputFile)) {
+//                        throw new PgpGeneralException(
+//                                getString(R.string.error_external_storage_not_ready));
+//                    }
+//
+//                    inStream = new FileInputStream(inputFile);
+//                    File file = new File(inputFile);
+//                    inLength = file.length();
+//                    inputData = new InputData(inStream, inLength);
+//
+//                    outStream = new FileOutputStream(outputFile);
+//
+//                    break;
+
+//                case TARGET_STREAM: /* Encrypting stream dari content uri */
+//                    Uri providerUri = (Uri) data.getParcelable(ENCRYPT_PROVIDER_URI);
+//
+//                    // InputStream
+//                    InputStream in = getContentResolver().openInputStream(providerUri);
+//                    inLength = PgpHelper.getLengthOfStream(in);
+//                    inputData = new InputData(in, inLength);
+//
+//                    // OutputStream
+//                    try {
+//                        while (true) {
+//                            streamFilename = PgpHelper.generateRandomFilename(32);
+//                            if (streamFilename == null) {
+//                                throw new PgpGeneralException("couldn't generate random file name");
+//                            }
+//                            openFileInput(streamFilename).close();
+//                        }
+//                    } catch (FileNotFoundException e) {
+//                        // found a name that isn't used yet
+//                    }
+//                    outStream = openFileOutput(streamFilename, Context.MODE_PRIVATE);
+//
+//                    break;
+
+                default:
+                    throw new PgpGeneralException("No target choosen!");
+
+                }
+
+                /* Operation */
+                PgpOperation operation = new PgpOperation(this, this, inputData, outStream);
+                if (generateSignature) {
+                    Log.d("stm-9", "generating signature...");
+                    operation.generateSignature(useAsciiArmor, false, secretKeyId, PassphraseCacheService.getCachedPassphrase(this, secretKeyId), Preferences.getPreferences(this).getDefaultHashAlgorithm(), Preferences.getPreferences(this).getForceV3Signatures());
+                } else if (signOnly) {
+                    Log.d("stm-9", "sign only...");
+                    operation.signText(secretKeyId, PassphraseCacheService.getCachedPassphrase(this, secretKeyId), Preferences.getPreferences(this).getDefaultHashAlgorithm(), Preferences.getPreferences(this).getForceV3Signatures());
+                } else {
+                    Log.d("stm-9", "encrypt...");
+                    operation.signAndEncrypt(useAsciiArmor, compressionId, encryptionKeyIds, encryptionPassphrase, Preferences.getPreferences(this).getDefaultEncryptionAlgorithm(), secretKeyId, Preferences.getPreferences(this).getDefaultHashAlgorithm(), Preferences.getPreferences(this).getForceV3Signatures(), PassphraseCacheService.getCachedPassphrase(this, secretKeyId));
+                }
+
+                outStream.close();
+
+                /* Output */
+
+                Bundle resultData = new Bundle();
+
+                switch (target) {
+                case TARGET_BYTES:
+                    if (useAsciiArmor) {
+                        String output = new String(
+                                ((ByteArrayOutputStream) outStream).toByteArray());
+                        if (generateSignature) {
+                            resultData.putString(RESULT_SIGNATURE_STRING, output);
+                        } else {
+                            resultData.putString(RESULT_ENCRYPTED_STRING, output);
+                        }
+                    } else {
+                        byte output[] = ((ByteArrayOutputStream) outStream).toByteArray();
+                        if (generateSignature) {
+                            resultData.putByteArray(RESULT_SIGNATURE_BYTES, output);
+                        } else {
+                            resultData.putByteArray(RESULT_ENCRYPTED_BYTES, output);
+                        }
+                    }
+
+                    break;
+//                case TARGET_FILE:
+                    // nothing, file was written, just send okay
+
+//                    break;
+//                case TARGET_STREAM:
+//                    String uri = DataStream.buildDataStreamUri(streamFilename).toString();
+//                    resultData.putString(RESULT_URI, uri);
+//
+//                    break;
+                }
+
+                OtherHelper.logDebugBundle(resultData, "resultData");
+
+                sendMessageToHandler(KeyIntentServiceHandler.MESSAGE_OKAY, resultData);
             } catch (Exception e) {
                 sendErrorToHandler(e);
             }

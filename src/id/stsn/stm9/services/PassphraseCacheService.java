@@ -1,17 +1,26 @@
 package id.stsn.stm9.services;
 
-import id.stsn.stm9.pgp.PgpKeyHelper;
-import id.stsn.stm9.provider.ProviderHelper;
+import java.util.Date;
+import java.util.HashMap;
 
 import org.spongycastle.openpgp.PGPException;
 import org.spongycastle.openpgp.PGPPrivateKey;
 import org.spongycastle.openpgp.PGPSecretKey;
+import org.spongycastle.openpgp.PGPSecretKeyRing;
 import org.spongycastle.openpgp.operator.PBESecretKeyDecryptor;
 import org.spongycastle.openpgp.operator.jcajce.JcePBESecretKeyDecryptorBuilder;
 
+import id.stsn.stm9.Id;
+import id.stsn.stm9.pgp.PgpKeyHelper;
+import id.stsn.stm9.provider.ProviderHelper;
+
+import android.app.AlarmManager;
+import android.app.PendingIntent;
 import android.app.Service;
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.os.Binder;
 import android.os.Bundle;
 import android.os.Handler;
@@ -19,20 +28,37 @@ import android.os.HandlerThread;
 import android.os.IBinder;
 import android.os.Message;
 import android.os.Messenger;
+import android.os.RemoteException;
 import android.util.Log;
 
-//public class PassphraseCacheService extends Service {
+/**
+ * This service runs in its own process, but is available to all other processes as the main
+ * passphrase cache. Use the static methods addCachedPassphrase and getCachedPassphrase for
+ * convenience.
+ * 
+ */
 public class PassphraseCacheService extends Service {
-
     public static final String TAG = "stm-9" + ": PassphraseCacheService";
 
-    public static final String ACTION_PASSPHRASE_CACHE_ADD = "id.stsn.stm9" + ".action." + "PASSPHRASE_CACHE_ADD";
-    public static final String ACTION_PASSPHRASE_CACHE_GET = "id.stsn.stm9" + ".action." + "PASSPHRASE_CACHE_GET";
+    public static final String ACTION_PASSPHRASE_CACHE_ADD = "id.stsn.stm9" + ".action."
+            + "PASSPHRASE_CACHE_ADD";
+    public static final String ACTION_PASSPHRASE_CACHE_GET = "id.stsn.stm9" + ".action."
+            + "PASSPHRASE_CACHE_GET";
+
+    public static final String BROADCAST_ACTION_PASSPHRASE_CACHE_SERVICE = "id.stsn.stm9" + ".action."
+            + "PASSPHRASE_CACHE_BROADCAST";
 
     public static final String EXTRA_TTL = "ttl";
     public static final String EXTRA_KEY_ID = "key_id";
     public static final String EXTRA_PASSPHRASE = "passphrase";
     public static final String EXTRA_MESSENGER = "messenger";
+
+    private static final int REQUEST_ID = 0;
+    private static final long DEFAULT_TTL = 15;
+
+    private BroadcastReceiver mIntentReceiver;
+
+    private HashMap<Long, String> mPassphraseCache = new HashMap<Long, String>();
 
     Context mContext;
 
@@ -46,15 +72,15 @@ public class PassphraseCacheService extends Service {
      * @param passphrase
      */
     public static void addCachedPassphrase(Context context, long keyId, String passphrase) {
-    	Log.d(TAG, "cacheNewPassphrase() for " + keyId);
+        Log.d(TAG, "cacheNewPassphrase() for " + keyId);
 
-    	Intent intent = new Intent(context, PassphraseCacheService.class);
-    	intent.setAction(ACTION_PASSPHRASE_CACHE_ADD);
-//    	intent.putExtra(EXTRA_TTL, Preferences.getPreferences(context).getPassPhraseCacheTtl());
-    	intent.putExtra(EXTRA_PASSPHRASE, passphrase);
-    	intent.putExtra(EXTRA_KEY_ID, keyId);
+        Intent intent = new Intent(context, PassphraseCacheService.class);
+        intent.setAction(ACTION_PASSPHRASE_CACHE_ADD);
+        intent.putExtra(EXTRA_TTL, 180);
+        intent.putExtra(EXTRA_PASSPHRASE, passphrase);
+        intent.putExtra(EXTRA_KEY_ID, keyId);
 
-    	context.startService(intent);
+        context.startService(intent);
     }
 
     /**
@@ -113,6 +139,201 @@ public class PassphraseCacheService extends Service {
         }
     }
 
+    /**
+     * Internal implementation to get cached passphrase.
+     * 
+     * @param keyId
+     * @return
+     */
+    private String getCachedPassphraseImpl(long keyId) {
+        Log.d(TAG, "getCachedPassphraseImpl() get masterKeyId for " + keyId);
+
+        // try to get master key id which is used as an identifier for cached passphrases
+        long masterKeyId = keyId;
+        if (masterKeyId != Id.kunci.symmetric) {
+            PGPSecretKeyRing keyRing = ProviderHelper.getPGPSecretKeyRingByKeyId(this, keyId);
+            if (keyRing == null) {
+                return null;
+            }
+            PGPSecretKey masterKey = PgpKeyHelper.getMasterKey(keyRing);
+            if (masterKey == null) {
+                return null;
+            }
+            masterKeyId = masterKey.getKeyID();
+        }
+        Log.d(TAG, "getCachedPassphraseImpl() for masterKeyId " + masterKeyId);
+
+        // get cached passphrase
+        String cachedPassphrase = mPassphraseCache.get(masterKeyId);
+        if (cachedPassphrase == null) {
+            // if key has no passphrase -> cache and return empty passphrase
+            if (!hasPassphrase(this, masterKeyId)) {
+                Log.d("stm-9", "Key has no passphrase! Caches and returns empty passphrase!");
+
+                addCachedPassphrase(this, masterKeyId, "");
+                return "";
+            } else {
+                return null;
+            }
+        }
+        // set it again to reset the cache life cycle
+        Log.d(TAG, "Cache passphrase again when getting it!");
+        addCachedPassphrase(this, masterKeyId, cachedPassphrase);
+
+        return cachedPassphrase;
+    }
+
+    /**
+     * Checks if key has a passphrase.
+     * 
+     * @param secretKeyId
+     * @return true if it has a passphrase
+     */
+    public static boolean hasPassphrase(Context context, long secretKeyId) {
+        // check if the key has no passphrase
+        try {
+            PGPSecretKey secretKey = PgpKeyHelper.getMasterKey(ProviderHelper
+                    .getPGPSecretKeyRingByKeyId(context, secretKeyId));
+            PBESecretKeyDecryptor keyDecryptor = new JcePBESecretKeyDecryptorBuilder().setProvider(
+                    "SC").build("".toCharArray());
+            PGPPrivateKey testKey = secretKey.extractPrivateKey(keyDecryptor);
+            if (testKey != null) {
+                return false;
+            }
+        } catch (PGPException e) {
+            // silently catch
+        }
+
+        return true;
+    }
+
+    /**
+     * Register BroadcastReceiver that is unregistered when service is destroyed. This
+     * BroadcastReceiver hears on intents with ACTION_PASSPHRASE_CACHE_SERVICE to then timeout
+     * specific passphrases in memory.
+     */
+    private void registerReceiver() {
+        if (mIntentReceiver == null) {
+            mIntentReceiver = new BroadcastReceiver() {
+                @Override
+                public void onReceive(Context context, Intent intent) {
+                    String action = intent.getAction();
+
+                    Log.d(TAG, "Received broadcast...");
+
+                    if (action.equals(BROADCAST_ACTION_PASSPHRASE_CACHE_SERVICE)) {
+                        long keyId = intent.getLongExtra(EXTRA_KEY_ID, -1);
+                        timeout(context, keyId);
+                    }
+                }
+            };
+
+            IntentFilter filter = new IntentFilter();
+            filter.addAction(BROADCAST_ACTION_PASSPHRASE_CACHE_SERVICE);
+            registerReceiver(mIntentReceiver, filter);
+        }
+    }
+
+    /**
+     * Build pending intent that is executed by alarm manager to time out a specific passphrase
+     * 
+     * @param context
+     * @param keyId
+     * @return
+     */
+    private static PendingIntent buildIntent(Context context, long keyId) {
+        Intent intent = new Intent(BROADCAST_ACTION_PASSPHRASE_CACHE_SERVICE);
+        intent.putExtra(EXTRA_KEY_ID, keyId);
+        PendingIntent sender = PendingIntent.getBroadcast(context, REQUEST_ID, intent,
+                PendingIntent.FLAG_CANCEL_CURRENT);
+
+        return sender;
+    }
+
+    /**
+     * Executed when service is started by intent
+     */
+    @Override
+    public int onStartCommand(Intent intent, int flags, int startId) {
+        Log.d(TAG, "onStartCommand()");
+
+        // register broadcastreceiver
+        registerReceiver();
+
+        if (intent != null && intent.getAction() != null) {
+            if (ACTION_PASSPHRASE_CACHE_ADD.equals(intent.getAction())) {
+                long ttl = intent.getLongExtra(EXTRA_TTL, DEFAULT_TTL);
+                long keyId = intent.getLongExtra(EXTRA_KEY_ID, -1);
+                String passphrase = intent.getStringExtra(EXTRA_PASSPHRASE);
+
+                Log.d(TAG,
+                        "Received ACTION_PASSPHRASE_CACHE_ADD intent in onStartCommand() with keyId: "
+                                + keyId + ", ttl: " + ttl);
+
+                // add keyId and passphrase to memory
+                mPassphraseCache.put(keyId, passphrase);
+
+                // register new alarm with keyId for this passphrase
+                long triggerTime = new Date().getTime() + (ttl * 1000);
+                AlarmManager am = (AlarmManager) this.getSystemService(Context.ALARM_SERVICE);
+                am.set(AlarmManager.RTC_WAKEUP, triggerTime, buildIntent(this, keyId));
+            } else if (ACTION_PASSPHRASE_CACHE_GET.equals(intent.getAction())) {
+                long keyId = intent.getLongExtra(EXTRA_KEY_ID, -1);
+                Messenger messenger = intent.getParcelableExtra(EXTRA_MESSENGER);
+
+                String passphrase = getCachedPassphraseImpl(keyId);
+
+                Message msg = Message.obtain();
+                Bundle bundle = new Bundle();
+                bundle.putString(EXTRA_PASSPHRASE, passphrase);
+                msg.obj = bundle;
+                try {
+                    messenger.send(msg);
+                } catch (RemoteException e) {
+                    Log.e("stm-9", "Sending message failed", e);
+                }
+            } else {
+                Log.e("stm-9", "Intent or Intent Action not supported!");
+            }
+        }
+
+        return START_STICKY;
+    }
+
+    /**
+     * Called when one specific passphrase for keyId timed out
+     * 
+     * @param context
+     * @param keyId
+     */
+    private void timeout(Context context, long keyId) {
+        // remove passphrase corresponding to keyId from memory
+        mPassphraseCache.remove(keyId);
+
+        Log.d(TAG, "Timeout of keyId " + keyId + ", removed from memory!");
+
+        // stop whole service if no cached passphrases remaining
+        if (mPassphraseCache.isEmpty()) {
+            Log.d(TAG, "No passphrases remaining in memory, stopping service!");
+            stopSelf();
+        }
+    }
+
+    @Override
+    public void onCreate() {
+        super.onCreate();
+        mContext = this;
+        Log.d("stm-9", "PassphraseCacheService, onCreate()");
+    }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        Log.d("stm-9", "PassphraseCacheService, onDestroy()");
+
+        unregisterReceiver(mIntentReceiver);
+    }
+
     @Override
     public IBinder onBind(Intent intent) {
         return mBinder;
@@ -125,4 +346,5 @@ public class PassphraseCacheService extends Service {
     }
 
     private final IBinder mBinder = new PassphraseCacheBinder();
+
 }

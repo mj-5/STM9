@@ -4,16 +4,20 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.Locale;
+import java.util.Vector;
 
 import org.spongycastle.bcpg.sig.KeyFlags;
 import org.spongycastle.openpgp.PGPPublicKey;
+import org.spongycastle.openpgp.PGPPublicKeyRing;
 import org.spongycastle.openpgp.PGPSecretKey;
+import org.spongycastle.openpgp.PGPSecretKeyRing;
 import org.spongycastle.openpgp.PGPSignature;
 import org.spongycastle.openpgp.PGPSignatureSubpacketVector;
 
 import android.content.Context;
 import android.util.Log;
 
+import id.stsn.stm9.R;
 import id.stsn.stm9.provider.ProviderHelper;
 import id.stsn.stm9.utility.IterableIterator;
 
@@ -231,5 +235,173 @@ public class PgpKeyHelper {
         }
 
         return convertFingerprintToHex(key.getFingerprint());
+    }
+    
+
+    @SuppressWarnings("unchecked")
+    public static PGPSecretKey getMasterKey(PGPSecretKeyRing keyRing) {
+        if (keyRing == null) {
+            return null;
+        }
+        for (PGPSecretKey key : new IterableIterator<PGPSecretKey>(keyRing.getSecretKeys())) {
+            if (key.isMasterKey()) {
+                return key;
+            }
+        }
+
+        return null;
+    }
+    
+
+    public static Vector<PGPSecretKey> getUsableSigningKeys(PGPSecretKeyRing keyRing) {
+        Vector<PGPSecretKey> usableKeys = new Vector<PGPSecretKey>();
+        Vector<PGPSecretKey> signingKeys = getSigningKeys(keyRing);
+        PGPSecretKey masterKey = null;
+        for (int i = 0; i < signingKeys.size(); ++i) {
+            PGPSecretKey key = signingKeys.get(i);
+            if (key.isMasterKey()) {
+                masterKey = key;
+            } else {
+                usableKeys.add(key);
+            }
+        }
+        if (masterKey != null) {
+            usableKeys.add(masterKey);
+        }
+        return usableKeys;
+    }
+    
+
+    @SuppressWarnings("unchecked")
+    public static Vector<PGPSecretKey> getSigningKeys(PGPSecretKeyRing keyRing) {
+        Vector<PGPSecretKey> signingKeys = new Vector<PGPSecretKey>();
+
+        for (PGPSecretKey key : new IterableIterator<PGPSecretKey>(keyRing.getSecretKeys())) {
+            if (isSigningKey(key)) {
+                signingKeys.add(key);
+            }
+        }
+
+        return signingKeys;
+    }
+    
+    @SuppressWarnings("unchecked")
+    public static PGPPublicKey getMasterKey(PGPPublicKeyRing keyRing) {
+        if (keyRing == null) {
+            return null;
+        }
+        for (PGPPublicKey key : new IterableIterator<PGPPublicKey>(keyRing.getPublicKeys())) {
+            if (key.isMasterKey()) {
+                return key;
+            }
+        }
+
+        return null;
+    }
+    
+
+    public static Vector<PGPPublicKey> getUsableEncryptKeys(PGPPublicKeyRing keyRing) {
+        Vector<PGPPublicKey> usableKeys = new Vector<PGPPublicKey>();
+        Vector<PGPPublicKey> encryptKeys = getEncryptKeys(keyRing);
+        PGPPublicKey masterKey = null;
+        for (int i = 0; i < encryptKeys.size(); ++i) {
+            PGPPublicKey key = encryptKeys.get(i);
+            if (!isExpired(key) && !key.isRevoked()) {
+                if (key.isMasterKey()) {
+                    masterKey = key;
+                } else {
+                    usableKeys.add(key);
+                }
+            }
+        }
+        if (masterKey != null) {
+            usableKeys.add(masterKey);
+        }
+        return usableKeys;
+    }
+
+    @SuppressWarnings("unchecked")
+    public static Vector<PGPPublicKey> getEncryptKeys(PGPPublicKeyRing keyRing) {
+        Vector<PGPPublicKey> encryptKeys = new Vector<PGPPublicKey>();
+
+        for (PGPPublicKey key : new IterableIterator<PGPPublicKey>(keyRing.getPublicKeys())) {
+            if (isEncryptionKey(key)) {
+                encryptKeys.add(key);
+            }
+        }
+
+        return encryptKeys;
+    }
+
+    public static boolean isExpired(PGPPublicKey key) {
+        Date creationDate = getCreationDate(key);
+        Date expiryDate = getExpiryDate(key);
+        Date now = new Date();
+        if (now.compareTo(creationDate) >= 0
+                && (expiryDate == null || now.compareTo(expiryDate) <= 0)) {
+            return false;
+        }
+        return true;
+    }
+
+    public static PGPSecretKey getSigningKey(Context context, long masterKeyId) {
+        PGPSecretKeyRing keyRing = ProviderHelper.getPGPSecretKeyRingByMasterKeyId(context,
+                masterKeyId);
+        if (keyRing == null) {
+            return null;
+        }
+        Vector<PGPSecretKey> signingKeys = getUsableSigningKeys(keyRing);
+        if (signingKeys.size() == 0) {
+            return null;
+        }
+        return signingKeys.get(0);
+    }
+    
+    public static PGPPublicKey getEncryptPublicKey(Context context, long masterKeyId) {
+        PGPPublicKeyRing keyRing = ProviderHelper.getPGPPublicKeyRingByMasterKeyId(context,
+                masterKeyId);
+        if (keyRing == null) {
+            Log.e("Stm-9", "keyRing is null!");
+            return null;
+        }
+        Vector<PGPPublicKey> encryptKeys = getUsableEncryptKeys(keyRing);
+        if (encryptKeys.size() == 0) {
+            Log.e("Stm-9", "encryptKeys is null!");
+            return null;
+        }
+        return encryptKeys.get(0);
+    }
+    
+    @SuppressWarnings("unchecked")
+    public static String getMainUserId(PGPSecretKey key) {
+        for (String userId : new IterableIterator<String>(key.getUserIDs())) {
+            return userId;
+        }
+        return null;
+    }
+
+    public static String getMainUserIdSafe(Context context, PGPSecretKey key) {
+        String userId = getMainUserId(key);
+        if (userId == null || userId.equals("")) {
+            userId = context.getString(R.string.unknown_user_id);
+        }
+        return userId;
+    }
+    
+
+    @SuppressWarnings("unchecked")
+    public static PGPSecretKey getKeyNum(PGPSecretKeyRing keyRing, long num) {
+        long cnt = 0;
+        if (keyRing == null) {
+            return null;
+        }
+        for (PGPSecretKey key : new IterableIterator<PGPSecretKey>(keyRing.getSecretKeys())) {
+            if (cnt == num) {
+                return key;
+            }
+            cnt++;
+        }
+
+        return null;
     }
 }

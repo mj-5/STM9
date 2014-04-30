@@ -8,7 +8,6 @@ import org.spongycastle.openpgp.PGPPublicKey;
 import org.spongycastle.openpgp.PGPSecretKeyRing;
 
 import id.stsn.stm9.pgp.PgpKeyHelper;
-import id.stsn.stm9.utility.AlgorithmNames;
 import id.stsn.stm9.utility.IterableIterator;
 
 public class ImportKeysListEntry implements Serializable {
@@ -23,7 +22,6 @@ public class ImportKeysListEntry implements Serializable {
     public int bitStrength;
     public String algorithm;
     public boolean secretKey;
-    AlgorithmNames algorithmNames;
 
     private boolean selected;
 
