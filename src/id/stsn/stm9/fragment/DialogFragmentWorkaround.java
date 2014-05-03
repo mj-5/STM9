@@ -43,8 +43,4 @@ public class DialogFragmentWorkaround {
             new Handler().postDelayed(runnable, RUNNABLE_DELAY);
         }
     }
-
-//    // Can't instantiate this class
-//    private DialogFragmentWorkaround() {
-//    }
 }

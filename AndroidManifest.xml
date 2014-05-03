@@ -23,7 +23,7 @@
         android:label="@string/app_name"
         android:theme="@style/Theme.Sherlock.Light" >
         <activity
-            android:name=".activity.MainMenu"
+            android:name=".activity.MainMenuActivity"
             android:configChanges="orientation|screenSize|keyboardHidden|keyboard"
             android:label="@string/app_name" >
             <intent-filter>
@@ -99,49 +99,6 @@
 
                 <data android:mimeType="*/*" />
             </intent-filter>
-            <!-- Linking "Decrypt" to file types -->
-            <intent-filter android:label="@string/intent_decrypt_file" >
-                <action android:name="android.intent.action.VIEW" />
-
-                <category android:name="android.intent.category.DEFAULT" />
-                <category android:name="android.intent.category.BROWSABLE" />
-
-                <data android:host="*" />
-                <data android:scheme="file" />
-                <data android:scheme="content" />
-                <!-- Workaround to match files in pathes with dots in them, like /cdcard/my.folder/test.gpg -->
-                <data android:pathPattern=".*\\.gpg" />
-                <data android:pathPattern=".*\\..*\\.gpg" />
-                <data android:pathPattern=".*\\..*\\..*\\.gpg" />
-                <data android:pathPattern=".*\\..*\\..*\\..*\\.gpg" />
-                <data android:pathPattern=".*\\..*\\..*\\..*\\..*\\.gpg" />
-                <data android:pathPattern=".*\\..*\\..*\\..*\\..*\\..*\\.gpg" />
-                <data android:pathPattern=".*\\..*\\..*\\..*\\..*\\..*\\..*\\.gpg" />
-                <data android:pathPattern=".*\\..*\\..*\\..*\\..*\\..*\\..*\\..*\\.gpg" />
-                <data android:pathPattern=".*\\..*\\..*\\..*\\..*\\..*\\..*\\..*\\..*\\.gpg" />
-                <data android:pathPattern=".*\\..*\\..*\\..*\\..*\\..*\\..*\\..*\\..*\\..*\\.gpg" />
-            </intent-filter>
-            <intent-filter android:label="@string/intent_decrypt_file" >
-                <action android:name="android.intent.action.VIEW" />
-
-                <category android:name="android.intent.category.DEFAULT" />
-                <category android:name="android.intent.category.BROWSABLE" />
-
-                <data android:host="*" />
-                <data android:scheme="file" />
-                <data android:scheme="content" />
-                <data android:mimeType="*/*" />
-                <data android:pathPattern=".*\\.asc" />
-                <data android:pathPattern=".*\\..*\\.asc" />
-                <data android:pathPattern=".*\\..*\\..*\\.asc" />
-                <data android:pathPattern=".*\\..*\\..*\\..*\\.asc" />
-                <data android:pathPattern=".*\\..*\\..*\\..*\\..*\\.asc" />
-                <data android:pathPattern=".*\\..*\\..*\\..*\\..*\\..*\\.asc" />
-                <data android:pathPattern=".*\\..*\\..*\\..*\\..*\\..*\\..*\\.asc" />
-                <data android:pathPattern=".*\\..*\\..*\\..*\\..*\\..*\\..*\\..*\\.asc" />
-                <data android:pathPattern=".*\\..*\\..*\\..*\\..*\\..*\\..*\\..*\\..*\\.asc" />
-                <data android:pathPattern=".*\\..*\\..*\\..*\\..*\\..*\\..*\\..*\\..*\\..*\\.asc" />
-            </intent-filter>
         </activity>
         <activity
             android:name=".services.PreferencesActivity"
@@ -171,48 +128,6 @@
 
                 <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
-            <!-- Linking "Import key" to file types -->
-            <intent-filter android:label="@string/intent_import_key" >
-                <action android:name="android.intent.action.VIEW" />
-
-                <category android:name="android.intent.category.DEFAULT" />
-                <category android:name="android.intent.category.BROWSABLE" />
-
-                <data android:host="*" />
-                <data android:scheme="file" />
-                <data android:scheme="content" />
-                <data android:pathPattern=".*\\.gpg" />
-                <data android:pathPattern=".*\\..*\\.gpg" />
-                <data android:pathPattern=".*\\..*\\..*\\.gpg" />
-                <data android:pathPattern=".*\\..*\\..*\\..*\\.gpg" />
-                <data android:pathPattern=".*\\..*\\..*\\..*\\..*\\.gpg" />
-                <data android:pathPattern=".*\\..*\\..*\\..*\\..*\\..*\\.gpg" />
-                <data android:pathPattern=".*\\..*\\..*\\..*\\..*\\..*\\..*\\.gpg" />
-                <data android:pathPattern=".*\\..*\\..*\\..*\\..*\\..*\\..*\\..*\\.gpg" />
-                <data android:pathPattern=".*\\..*\\..*\\..*\\..*\\..*\\..*\\..*\\..*\\.gpg" />
-                <data android:pathPattern=".*\\..*\\..*\\..*\\..*\\..*\\..*\\..*\\..*\\..*\\.gpg" />
-            </intent-filter>
-            <intent-filter android:label="@string/intent_import_key" >
-                <action android:name="android.intent.action.VIEW" />
-
-                <category android:name="android.intent.category.DEFAULT" />
-                <category android:name="android.intent.category.BROWSABLE" />
-
-                <data android:host="*" />
-                <data android:scheme="file" />
-                <data android:scheme="content" />
-                <data android:mimeType="*/*" />
-                <data android:pathPattern=".*\\.asc" />
-                <data android:pathPattern=".*\\..*\\.asc" />
-                <data android:pathPattern=".*\\..*\\..*\\.asc" />
-                <data android:pathPattern=".*\\..*\\..*\\..*\\.asc" />
-                <data android:pathPattern=".*\\..*\\..*\\..*\\..*\\.asc" />
-                <data android:pathPattern=".*\\..*\\..*\\..*\\..*\\..*\\.asc" />
-                <data android:pathPattern=".*\\..*\\..*\\..*\\..*\\..*\\..*\\.asc" />
-                <data android:pathPattern=".*\\..*\\..*\\..*\\..*\\..*\\..*\\..*\\.asc" />
-                <data android:pathPattern=".*\\..*\\..*\\..*\\..*\\..*\\..*\\..*\\..*\\.asc" />
-                <data android:pathPattern=".*\\..*\\..*\\..*\\..*\\..*\\..*\\..*\\..*\\..*\\.asc" />
-            </intent-filter>
         </activity>
         <activity
             android:name=".activity.KeyServerUploadActivity"
@@ -223,15 +138,6 @@
             android:configChanges="orientation|screenSize|keyboardHidden|keyboard"
             android:label="@string/title_select_secret_key"
             android:launchMode="singleTop" >
-
-            <!-- <intent-filter> -->
-            <!-- <action android:name="android.intent.action.SEARCH" /> -->
-            <!-- </intent-filter> -->
-
-
-            <!-- <meta-data -->
-            <!-- android:name="android.app.searchable" -->
-            <!-- android:resource="@xml/searchable_secret_keys" /> -->
         </activity>
         <activity
             android:name=".activity.SelectPublicKeyActivity"
@@ -239,15 +145,6 @@
             android:label="@string/title_select_recipients"
             android:launchMode="singleTop"
             android:uiOptions="splitActionBarWhenNarrow" >
-
-            <!-- <intent-filter> -->
-            <!-- <action android:name="android.intent.action.SEARCH" /> -->
-            <!-- </intent-filter> -->
-
-
-            <!-- <meta-data -->
-            <!-- android:name="android.app.searchable" -->
-            <!-- android:resource="@xml/searchable_public_keys" /> -->
         </activity>
 
         <!-- Internal services/content providers (not exported) -->

@@ -1,11 +1,21 @@
 package id.stsn.stm9.services;
 
+import id.stsn.stm9.Id;
+import id.stsn.stm9.R;
+import id.stsn.stm9.pgp.PgpConvert;
+import id.stsn.stm9.pgp.PgpGeneralException;
+import id.stsn.stm9.pgp.PgpImportExport;
+import id.stsn.stm9.pgp.PgpKeyOperation;
+import id.stsn.stm9.pgp.PgpOperation;
+import id.stsn.stm9.provider.ProviderHelper;
+import id.stsn.stm9.utility.HkpKeyServer;
+import id.stsn.stm9.utility.InputData;
+import id.stsn.stm9.utility.KeyServer.KeyInfo;
+import id.stsn.stm9.utility.ProgressDialogUpdater;
+
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
-import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
-import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.ArrayList;
@@ -14,25 +24,8 @@ import org.spongycastle.openpgp.PGPPublicKeyRing;
 import org.spongycastle.openpgp.PGPSecretKey;
 import org.spongycastle.openpgp.PGPSecretKeyRing;
 
-import id.stsn.stm9.Id;
-import id.stsn.stm9.R;
-import id.stsn.stm9.pgp.PgpConvert; //v
-import id.stsn.stm9.pgp.PgpGeneralException; //v
-import id.stsn.stm9.pgp.PgpHelper;
-import id.stsn.stm9.pgp.PgpImportExport; //v
-import id.stsn.stm9.pgp.PgpKeyOperation; //v
-import id.stsn.stm9.pgp.PgpOperation;
-import id.stsn.stm9.provider.ProviderHelper;
-//import id.stsn.stm9.provider.KeyContract.DataStream;
-import id.stsn.stm9.utility.HkpKeyServer;
-import id.stsn.stm9.utility.KeyServer.KeyInfo;
-import id.stsn.stm9.utility.ProgressDialogUpdater; //v
-import id.stsn.stm9.utility.InputData;
-
 import android.app.IntentService;
-import android.content.Context;
 import android.content.Intent;
-import android.net.Uri;
 import android.os.Bundle;
 import android.os.Message;
 import android.os.Messenger;
@@ -58,7 +51,7 @@ public class KeyIntentService extends IntentService implements ProgressDialogUpd
 	public static final String ACTION_IMPORT_KEYRING = "id.stsn.stm9" + ".action." + "IMPORT_KEYRING";
 	public static final String ACTION_UPLOAD_KEYRING = "id.stsn.stm9" + ".action." + "UPLOAD_KEYRING";
 	public static final String ACTION_ENCRYPT_SIGN = "id.stsn.stm9.stm_9" + ".action." + "ENCRYPT_SIGN";
-
+	public static final String ACTION_DECRYPT_VERIFY = "id.stsn.stm9" + ".action." + "DECRYPT_VERIFY";
 
 	/* data bundle kunci2 */
 
@@ -128,12 +121,28 @@ public class KeyIntentService extends IntentService implements ProgressDialogUpd
 	public static final String ENCRYPT_GENERATE_SIGNATURE = "generate_signature";
 	public static final String ENCRYPT_SIGN_ONLY = "sign_only";
 	public static final String ENCRYPT_MESSAGE_BYTES = "message_bytes";
+    public static final String ENCRYPT_PROVIDER_URI = "provider_uri";
 
 	  /* encrypt sign result */
 	  public static final String RESULT_SIGNATURE_BYTES = "signature_data";
 	  public static final String RESULT_SIGNATURE_STRING = "signature_text";
 	  public static final String RESULT_ENCRYPTED_STRING = "encrypted_message";
 	  public static final String RESULT_ENCRYPTED_BYTES = "encrypted_data";
+
+	  /* decrypt dan verify */ 
+	  public static final String DECRYPT_SIGNED_ONLY = "signed_only";
+	  public static final String DECRYPT_RETURN_BYTES = "return_binary";
+	  public static final String DECRYPT_CIPHERTEXT_BYTES = "ciphertext_bytes";
+	  public static final String RESULT_DECRYPTED_STRING = "decrypted_message";
+	  public static final String RESULT_DECRYPTED_BYTES = "decrypted_data";
+	  public static final String RESULT_SIGNATURE = "signature";
+	  public static final String RESULT_SIGNATURE_KEY_ID = "signature_key_id";
+	  public static final String RESULT_SIGNATURE_USER_ID = "signature_user_id";
+	  public static final String RESULT_SIGNATURE_SUCCESS = "signature_success";
+	  public static final String RESULT_SIGNATURE_UNKNOWN = "signature_unknown";
+	  public static final String DECRYPT_ASSUME_SYMMETRIC = "assume_symmetric";
+	  public static final String DECRYPT_LOOKUP_UNKNOWN_KEY = "lookup_unknownKey";
+	  public static final String RESULT_SIGNATURE_LOOKUP_KEY = "lookup_key";
 
 	Messenger vMessenger;
 
@@ -346,7 +355,6 @@ public class KeyIntentService extends IntentService implements ProgressDialogUpd
 				case TARGET_STREAM:
 					// TODO: not implemented
 					break;
-
 				}
 
 				Bundle resultData = new Bundle();
@@ -402,7 +410,6 @@ public class KeyIntentService extends IntentService implements ProgressDialogUpd
                 long inLength = -1;
                 InputData inputData = null;
                 OutputStream outStream = null;
-                String streamFilename = null;
                 switch (target) {
                 case TARGET_BYTES: /* encrypting bytes directly */
                     byte[] bytes = data.getByteArray(ENCRYPT_MESSAGE_BYTES);
@@ -414,49 +421,6 @@ public class KeyIntentService extends IntentService implements ProgressDialogUpd
                     outStream = new ByteArrayOutputStream();
 
                     break;
-//                case TARGET_FILE: /* encrypting file */
-//                    String inputFile = data.getString(ENCRYPT_INPUT_FILE);
-//                    String outputFile = data.getString(ENCRYPT_OUTPUT_FILE);
-//
-//                    // check if storage is ready
-//                    if (!FileHelper.isStorageMounted(inputFile)
-//                            || !FileHelper.isStorageMounted(outputFile)) {
-//                        throw new PgpGeneralException(
-//                                getString(R.string.error_external_storage_not_ready));
-//                    }
-//
-//                    inStream = new FileInputStream(inputFile);
-//                    File file = new File(inputFile);
-//                    inLength = file.length();
-//                    inputData = new InputData(inStream, inLength);
-//
-//                    outStream = new FileOutputStream(outputFile);
-//
-//                    break;
-
-//                case TARGET_STREAM: /* Encrypting stream dari content uri */
-//                    Uri providerUri = (Uri) data.getParcelable(ENCRYPT_PROVIDER_URI);
-//
-//                    // InputStream
-//                    InputStream in = getContentResolver().openInputStream(providerUri);
-//                    inLength = PgpHelper.getLengthOfStream(in);
-//                    inputData = new InputData(in, inLength);
-//
-//                    // OutputStream
-//                    try {
-//                        while (true) {
-//                            streamFilename = PgpHelper.generateRandomFilename(32);
-//                            if (streamFilename == null) {
-//                                throw new PgpGeneralException("couldn't generate random file name");
-//                            }
-//                            openFileInput(streamFilename).close();
-//                        }
-//                    } catch (FileNotFoundException e) {
-//                        // found a name that isn't used yet
-//                    }
-//                    outStream = openFileOutput(streamFilename, Context.MODE_PRIVATE);
-//
-//                    break;
 
                 default:
                     throw new PgpGeneralException("No target choosen!");
@@ -502,15 +466,6 @@ public class KeyIntentService extends IntentService implements ProgressDialogUpd
                     }
 
                     break;
-//                case TARGET_FILE:
-                    // nothing, file was written, just send okay
-
-//                    break;
-//                case TARGET_STREAM:
-//                    String uri = DataStream.buildDataStreamUri(streamFilename).toString();
-//                    resultData.putString(RESULT_URI, uri);
-//
-//                    break;
                 }
 
                 OtherHelper.logDebugBundle(resultData, "resultData");
@@ -519,7 +474,72 @@ public class KeyIntentService extends IntentService implements ProgressDialogUpd
             } catch (Exception e) {
                 sendErrorToHandler(e);
             }
-		}
+		} else if (ACTION_DECRYPT_VERIFY.equals(action)) {
+          try {
+          /* Input */
+          int target = data.getInt(TARGET);
+
+          long secretKeyId = data.getLong(ENCRYPT_SECRET_KEY_ID);
+          byte[] bytes = data.getByteArray(DECRYPT_CIPHERTEXT_BYTES);
+          boolean signedOnly = data.getBoolean(DECRYPT_SIGNED_ONLY);
+          boolean returnBytes = data.getBoolean(DECRYPT_RETURN_BYTES);
+
+          InputStream inStream = null;
+          long inLength = -1;
+          InputData inputData = null;
+          OutputStream outStream = null;
+          switch (target) {
+          case TARGET_BYTES: /* decrypting bytes directly */
+              inStream = new ByteArrayInputStream(bytes);
+              inLength = bytes.length;
+
+              inputData = new InputData(inStream, inLength);
+              outStream = new ByteArrayOutputStream();
+
+              break;
+
+          default:
+              throw new PgpGeneralException("No target choosen!");
+
+          }
+
+          /* Operation */
+
+          Bundle resultData = new Bundle();
+
+          // verifyText and decrypt returning additional resultData values for the verification of signatures
+          PgpOperation operation = new PgpOperation(this, this, inputData, outStream);
+          if (signedOnly) {
+              resultData = operation.verifyText();
+          } else {
+              resultData = operation.decryptAndVerify(PassphraseCacheService.getCachedPassphrase(this, secretKeyId));
+          }
+
+          outStream.close();
+
+          /* Output */
+
+          switch (target) {
+          case TARGET_BYTES:
+              if (returnBytes) {
+                  byte output[] = ((ByteArrayOutputStream) outStream).toByteArray();
+                  resultData.putByteArray(RESULT_DECRYPTED_BYTES, output);
+              } else {
+                  String output = new String(
+                          ((ByteArrayOutputStream) outStream).toByteArray());
+                  resultData.putString(RESULT_DECRYPTED_STRING, output);
+              }
+
+              break;
+          }
+
+          OtherHelper.logDebugBundle(resultData, "resultData");
+
+          sendMessageToHandler(KeyIntentServiceHandler.MESSAGE_OKAY, resultData);
+      } catch (Exception e) {
+          sendErrorToHandler(e);
+      }
+  }
 	}
 
 	private void sendErrorToHandler(Exception e) {

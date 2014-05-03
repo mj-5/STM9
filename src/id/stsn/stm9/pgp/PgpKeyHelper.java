@@ -404,4 +404,12 @@ public class PgpKeyHelper {
 
         return null;
     }
+    
+    @SuppressWarnings("unchecked")
+    public static String getMainUserId(PGPPublicKey key) {
+        for (String userId : new IterableIterator<String>(key.getUserIDs())) {
+            return userId;
+        }
+        return null;
+    }
 }

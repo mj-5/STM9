@@ -47,12 +47,12 @@ public class MainMenuActivity extends Activity {
 			}
 		});
 
-//		btnDecVer.setOnClickListener(new OnClickListener() {
-//			@Override
-//			public void onClick(View v) {
-//				decVer();
-//			}
-//		});
+		btnDecVer.setOnClickListener(new OnClickListener() {
+			@Override
+			public void onClick(View v) {
+				decVer();
+			}
+		});
 	}
 
 	protected void keyList() {
@@ -70,8 +70,8 @@ public class MainMenuActivity extends Activity {
 		startActivity(i);		
 	}
 
-//	protected void decVer() {
-//		Intent i = new Intent(this, DecVerActivity.class);
-//		startActivity(i);		
-//	}
+	protected void decVer() {
+		Intent i = new Intent(this, DecVerActivity.class);
+		startActivity(i);		
+	}
 }

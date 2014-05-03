@@ -41,7 +41,6 @@ import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
-import android.widget.ViewFlipper;
 
 import com.actionbarsherlock.view.Menu;
 import com.actionbarsherlock.view.MenuItem;
@@ -97,9 +96,13 @@ public class EncSignActivity extends SherlockFragmentActivity {
 			Intent intent = new Intent(this, MainMenuActivity.class);
 			intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
 			startActivity(intent);
+			
+			return true;
 
 		case Id.menu.opsi.encrypt:
 			encryptClicked();
+			
+			return true;
 
 		default:
 			return super.onOptionsItemSelected(item);
@@ -109,7 +112,7 @@ public class EncSignActivity extends SherlockFragmentActivity {
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 
-		setContentView(R.layout.enc_sign_activity2);
+		setContentView(R.layout.enc_sign_activity);
 
 		ActionBarHelper.setBackButton(this);
 
@@ -167,7 +170,7 @@ public class EncSignActivity extends SherlockFragmentActivity {
 		}
 		
 		else {
-			Log.e("stm9-enc", "Include the extra 'text' or an Uri with setData() in your Intent!");
+			Log.e("stm9-enc", "Include the extra 'text' with setData() in your Intent!");
 		}
 	}
 
@@ -296,7 +299,6 @@ public class EncSignActivity extends SherlockFragmentActivity {
     }
     
     private void updateActionBarButtons() {
-//    	if (mSource.getId() == R.id.sourceMessage) {
     	if (mEncryptionKeyIds == null || mEncryptionKeyIds.length == 0) {
     		if (mSecretKeyId == 0) {
     			setActionbarButtons(false, 0);
@@ -306,7 +308,6 @@ public class EncSignActivity extends SherlockFragmentActivity {
     	} else {
     		setActionbarButtons(true, R.string.tmbl_encrypt_and_send);
     	}
-//    	}
     }
     
     private void encryptClicked() {
@@ -314,7 +315,6 @@ public class EncSignActivity extends SherlockFragmentActivity {
 
     	boolean encryptIt = (mEncryptionKeyIds != null && mEncryptionKeyIds.length > 0);
 
-//    	if (mMode.getId() == R.id.modeAsymmetric){
     		if (!encryptIt && mSecretKeyId == 0) {
     			Toast.makeText(this, R.string.select_encryption_or_signature_key, Toast.LENGTH_SHORT)
     			.show();
@@ -327,7 +327,6 @@ public class EncSignActivity extends SherlockFragmentActivity {
 
     			return;
     		}
-//    	}
     	
     	encryptStart();
     }
@@ -369,16 +368,13 @@ public class EncSignActivity extends SherlockFragmentActivity {
     	boolean signOnly = false;
     	long mSecretKeyIdToPass = 0;
 
-//    	if (mMode.getId() == R.id.modeAsymmetric) {
     		mSecretKeyIdToPass = mSecretKeyId;
     		encryptionKeyIds = mEncryptionKeyIds;
     		signOnly = (mEncryptionKeyIds == null || mEncryptionKeyIds.length == 0);
-//    	}
 
     	intent.setAction(KeyIntentService.ACTION_ENCRYPT_SIGN);
 
-    	/* choose default target and data bundle */
-//    	if (mEncryptTarget == Id.target.email) {
+    	/* default target and data bundle */
     		useAsciiArmor = true;
     		compressionId = Preferences.getPreferences(this).getDefaultMessageCompression();
 
@@ -389,7 +385,6 @@ public class EncSignActivity extends SherlockFragmentActivity {
     			fixBadCharactersForGmail(message);
     		}
     		data.putByteArray(KeyIntentService.ENCRYPT_MESSAGE_BYTES, message.getBytes());
-//    	}
 
     	data.putLong(KeyIntentService.ENCRYPT_SECRET_KEY_ID, mSecretKeyIdToPass);
     	data.putBoolean(KeyIntentService.ENCRYPT_USE_ASCII_ARMOR, useAsciiArmor);
@@ -417,13 +412,10 @@ public class EncSignActivity extends SherlockFragmentActivity {
     				Log.d("stm-9", "output: " + output);
 
     				/* encode output to qr code */
-    				mImage = QrCodeUtils.getQRCodeBitmap(output, 1000 );
+    				mImage = QrCodeUtils.getQRCodeBitmap(output, 500 );
 
     				Intent sendIntent = new Intent(Intent.ACTION_SEND);
 
-    				// Type is set to text/plain so that encrypted messages can
-    				// be sent with Whatsapp, Hangouts, SMS etc...
-    				//                    sendIntent.setType("text/plain");
     				sendIntent.setType("image/png");
 
     				ByteArrayOutputStream bytes = new ByteArrayOutputStream();
@@ -459,7 +451,6 @@ public class EncSignActivity extends SherlockFragmentActivity {
         message = message.replaceAll(" +\n", "\n");
         message = message.replaceAll("\n\n+", "\n\n");
         message = message.replaceFirst("^\n+", "");
-        // make sure there'll be exactly one newline at the end
         message = message.replaceFirst("\n*$", "\n");
 
         return message;

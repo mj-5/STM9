@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <classpath>
-	<classpathentry kind="src" path="src"/>
+	<classpathentry excluding="id/stsn/stm9/fragment/DeleteKeyDialogFragment.java|id/stsn/stm9/utility/Primes.java|id/stsn/stm9/widget/DashboardLayout.java|id/stsn/stm9/fragment/ImportKeysServerFragment.java|id/stsn/stm9/fragment/ImportKeysFileFragment.java|id/stsn/stm9/fragment/DeleteFileDialogFragment.java|id/stsn/stm9/utility/AlgorithmNames.java|id/stsn/stm9/activity/EncSignActivity2.java|id/stsn/stm9/activity/DecVerActivity2.java|id/stsn/stm9/widget/ClipboardReflection.java" kind="src" path="src"/>
 	<classpathentry kind="src" path="gen"/>
 	<classpathentry kind="con" path="com.android.ide.eclipse.adt.ANDROID_FRAMEWORK"/>
 	<classpathentry exported="true" kind="con" path="com.android.ide.eclipse.adt.LIBRARIES"/>

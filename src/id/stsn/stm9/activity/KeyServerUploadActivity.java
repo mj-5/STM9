@@ -21,8 +21,6 @@ import android.widget.Spinner;
 import android.widget.Toast;
 
 /**
- * gpg --send-key activity
- * 
  * Sends the selected public key to a key server
  */
 public class KeyServerUploadActivity extends SherlockFragmentActivity {

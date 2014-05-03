@@ -1,14 +1,19 @@
 package id.stsn.stm9.pgp;
 
+import id.stsn.stm9.Id;
 import id.stsn.stm9.R;
-import id.stsn.stm9.utility.ProgressDialogUpdater;
+import id.stsn.stm9.provider.ProviderHelper;
 
-import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.io.RandomAccessFile;
-import java.security.SecureRandom;
+import java.io.InputStream;
+import java.util.Iterator;
 import java.util.regex.Pattern;
+
+import org.spongycastle.openpgp.PGPEncryptedDataList;
+import org.spongycastle.openpgp.PGPObjectFactory;
+import org.spongycastle.openpgp.PGPPublicKeyEncryptedData;
+import org.spongycastle.openpgp.PGPSecretKey;
+import org.spongycastle.openpgp.PGPUtil;
 
 import android.content.Context;
 import android.content.pm.PackageInfo;
@@ -17,9 +22,15 @@ import android.util.Log;
 
 public class PgpHelper {
 
-    public static Pattern PGP_PUBLIC_KEY = Pattern.compile(
-            ".*?(-----BEGIN PGP PUBLIC KEY BLOCK-----.*?-----END PGP PUBLIC KEY BLOCK-----).*",
-            Pattern.DOTALL);
+	public static Pattern PGP_PUBLIC_KEY = Pattern.compile(
+            ".*?(-----BEGIN PGP PUBLIC KEY BLOCK-----.*?-----END PGP PUBLIC KEY BLOCK-----).*",Pattern.DOTALL);
+    
+    public static Pattern PGP_MESSAGE = Pattern.compile(
+            ".*?(-----BEGIN PGP MESSAGE-----.*?-----END PGP MESSAGE-----).*", Pattern.DOTALL);
+
+    public static Pattern PGP_SIGNED_MESSAGE = Pattern.compile(
+    		".*?(-----BEGIN PGP SIGNED MESSAGE-----.*?-----BEGIN PGP SIGNATURE-----.*?-----END PGP SIGNATURE-----).*",
+    		Pattern.DOTALL);
 
     public static String getVersion(Context context) {
         String version = null;
@@ -37,35 +48,50 @@ public class PgpHelper {
         return "STM9 v" + getVersion(context);
     }
     
-//    /**
-//     * Deletes file securely by overwriting it with random data before deleting it.
-//     * 
-//     * TODO: Does this really help on flash storage?
-//     * 
-//     * @param context
-//     * @param progress
-//     * @param file
-//     * @throws FileNotFoundException
-//     * @throws IOException
-//     */
-//    public static void deleteFileSecurely(Context context, ProgressDialogUpdater progress, File file)
-//            throws FileNotFoundException, IOException {
-//        long length = file.length();
-//        SecureRandom random = new SecureRandom();
-//        RandomAccessFile raf = new RandomAccessFile(file, "rws");
-//        raf.seek(0);
-//        raf.getFilePointer();
-//        byte[] data = new byte[1 << 16];
-//        int pos = 0;
-//        String msg = context.getString(R.string.proses_deleting_securely, file.getName());
-//        while (pos < length) {
-//            if (progress != null)
-//                progress.setProgress(msg, (int) (100 * pos / length), 100);
-//            random.nextBytes(data);
-//            raf.write(data);
-//            pos += data.length;
-//        }
-//        raf.close();
-//        file.delete();
-//    }
+    public static long getDecryptionKeyId(Context context, InputStream inputStream)
+            throws PgpGeneralException, NoAsymmetricEncryptionException, IOException {
+        InputStream in = PGPUtil.getDecoderStream(inputStream);
+        PGPObjectFactory pgpF = new PGPObjectFactory(in);
+        PGPEncryptedDataList enc;
+        Object o = pgpF.nextObject();
+
+        // the first object might be a PGP marker packet.
+        if (o instanceof PGPEncryptedDataList) {
+            enc = (PGPEncryptedDataList) o;
+        } else {
+            enc = (PGPEncryptedDataList) pgpF.nextObject();
+        }
+
+        if (enc == null) {
+            throw new PgpGeneralException(context.getString(R.string.error_invalid_data));
+        }
+
+        // TODO: currently we always only look at the first known key
+        // find the secret key
+        PGPSecretKey secretKey = null;
+        Iterator<?> it = enc.getEncryptedDataObjects();
+        boolean gotAsymmetricEncryption = false;
+        while (it.hasNext()) {
+            Object obj = it.next();
+            if (obj instanceof PGPPublicKeyEncryptedData) {
+                gotAsymmetricEncryption = true;
+                PGPPublicKeyEncryptedData pbe = (PGPPublicKeyEncryptedData) obj;
+                secretKey = ProviderHelper.getPGPSecretKeyByKeyId(context, pbe.getKeyID());
+                if (secretKey != null) {
+                    break;
+                }
+            }
+        }
+
+        if (!gotAsymmetricEncryption) {
+            throw new NoAsymmetricEncryptionException();
+        }
+
+        if (secretKey == null) {
+            return Id.kunci.none;
+        }
+
+        return secretKey.getKeyID();
+    }
+
 }
