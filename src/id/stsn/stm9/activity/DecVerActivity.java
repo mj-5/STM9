@@ -19,6 +19,7 @@ import id.stsn.stm9.services.FileHelper;
 import id.stsn.stm9.services.KeyIntentService;
 import id.stsn.stm9.services.KeyIntentServiceHandler;
 import id.stsn.stm9.services.PassphraseCacheService;
+import id.stsn.stm9.utility.QrCodeUtils;
 
 import android.app.ProgressDialog;
 import android.content.Intent;
@@ -190,18 +191,8 @@ public class DecVerActivity extends SherlockFragmentActivity{
             		String path = FileHelper.getPath(this, uri);
                     Log.i("images path", path);
                     
-                    Bitmap bMap = BitmapFactory.decodeFile(path);
-                    mImage.setImageBitmap(bMap);
-                    
-                    LuminanceSource source = new id.stsn.stm9.utility.RGBLuminanceSources(bMap);
-                    BinaryBitmap bitmap = new BinaryBitmap(new HybridBinarizer(source));
-                    
-                    Reader reader = new MultiFormatReader();
-                    Result result;
-                    
-                    result = reader.decode(bitmap);
-                    String text = result.getText();
-                    Log.i("decode result", text);
+                    /* decode Qr Code to Text */
+                    String text = QrCodeUtils.getQrCodeText(path, mImage);
                     
                     extras.putString(EXTRA_TEXT, text);
                     action = ACTION_DECRYPT;
